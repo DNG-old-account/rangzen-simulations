@@ -10,7 +10,7 @@ import java.util.List;
 public class ProximityEncounterModel implements Steppable {
   private static final long serialVersionUID = 1;
 
-  private static final double NEIGHBORHOOD_RADIUS = 5.0;
+  private static final double NEIGHBORHOOD_RADIUS = 10.0;
   private static final double encounterChance = 0.2;
 
 
@@ -24,7 +24,9 @@ public class ProximityEncounterModel implements Steppable {
             sim.space.getNeighborsExactlyWithinDistance(location, 
                                                         NEIGHBORHOOD_RADIUS);
       for (Object p2 : neighborhood) {
-        p1.encounter((Person) p2);
+        if (sim.random.nextDouble() < encounterChance) {
+          p1.encounter((Person) p2);
+        }
       }
     }
     System.out.println("Done stepping encounter model");
