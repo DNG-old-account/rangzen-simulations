@@ -29,7 +29,7 @@ public class MessagePropagationSimulation extends SimState {
 
     people = new ArrayList<Person>();
     for (int i=0; i<NUMBER_OF_PEOPLE; i++) {
-      Person p = new Person();
+      Person p = new Person(i);
       people.add(p);
 
       Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,

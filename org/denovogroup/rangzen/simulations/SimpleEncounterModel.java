@@ -8,7 +8,7 @@ import java.util.List;
 public class SimpleEncounterModel implements Steppable {
   private static final long serialVersionUID = 1;
 
-  private static final double encounterChance = 0.05;
+  private static final double encounterChance = 0.0035;
 
   public void step(SimState state) {
     MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
@@ -21,9 +21,13 @@ public class SimpleEncounterModel implements Steppable {
         }
       }
     }
+    System.out.println("Done stepping encounter model");
+
   }
 
   private void encounter(Person p1, Person p2) {
+    p1.encounter(p2);
+    p2.encounter(p1);
       
   }
 }
