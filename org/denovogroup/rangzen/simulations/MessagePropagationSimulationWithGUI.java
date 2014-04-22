@@ -28,7 +28,7 @@ public class MessagePropagationSimulationWithGUI extends GUIState {
     public void setupPortrayals() {
       // What to display.
       spacePortrayal.setField(((MessagePropagationSimulation) state).space);
-      spacePortrayal.setPortrayalForAll(new OvalPortrayal2D(2));
+      spacePortrayal.setPortrayalForAll(new OvalPortrayal2D(5));
 
       display.reset();    // reschedule the displayer
       display.setBackdrop(Color.white);

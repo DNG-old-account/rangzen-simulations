@@ -2,6 +2,8 @@ package org.denovogroup.rangzen.simulations;
 
 import sim.engine.Steppable;
 import sim.engine.SimState;
+import sim.util.Double2D;
+import sim.util.MutableDouble2D;
 
 import java.util.PriorityQueue;
 import java.util.HashMap;
@@ -26,8 +28,20 @@ public class Person implements Steppable {
 
   public void step(SimState state) {
     MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
-    
+    takeRandomStep(sim);
+
     // TODO(lerner): Author message with some probability.
+  }
+  
+  private void takeRandomStep(MessagePropagationSimulation sim) {
+    Double2D me = sim.space.getObjectLocation(this);
+    MutableDouble2D sumForces = new MutableDouble2D();
+    sumForces.addIn(new Double2D(sim.randomMultiplier * (sim.random.nextInt(5)-2 * 1.0),
+          sim.randomMultiplier * (sim.random.nextInt(5)-2 * 1.0)));
+
+    sumForces.addIn(me);
+    sim.space.setObjectLocation(this, new Double2D(sumForces));
+
   }
 
   public void putMessages(PriorityQueue<Message> newMessages, int otherName) {

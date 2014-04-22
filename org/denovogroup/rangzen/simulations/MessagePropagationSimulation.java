@@ -15,6 +15,8 @@ public class MessagePropagationSimulation extends SimState {
   public static final int height = 1000;
   public static final double discretization = 1.0;
 
+  public static final double randomMultiplier = 0.5;
+
   public Continuous2D space;
 
   /** All the people in the simulation. */
@@ -35,6 +37,7 @@ public class MessagePropagationSimulation extends SimState {
       Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
           space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
       space.setObjectLocation(p, randomLoc);
+      schedule.scheduleRepeating(p);
     }
 
     schedule.scheduleRepeating(new SimpleEncounterModel());
