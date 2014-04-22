@@ -32,4 +32,8 @@ public class Message implements Comparable<Message> {
     }
   }
 
+  public String toString() {
+    return "("+priority+"): "+content;
+  }
+
 }
