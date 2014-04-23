@@ -1,0 +1,4 @@
+[alias]
+    simulation = //apps/simulation:simulation
+[java]
+    src_roots = /java/

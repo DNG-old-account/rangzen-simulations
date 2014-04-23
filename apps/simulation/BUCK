@@ -1,0 +1,7 @@
+java_binary(
+  name = 'simulation',
+  deps = [
+    '//java/org/denovogroup/rangzen/simulation:simulation',
+  ],
+  main_class = 'org.denovogroup.rangzen.simulation.MessagePropagationSimulationWithGUI',
+)
