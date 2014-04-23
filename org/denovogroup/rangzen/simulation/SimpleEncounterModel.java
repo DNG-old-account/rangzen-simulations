@@ -2,6 +2,7 @@ package org.denovogroup.rangzen.simulation;
 
 import sim.engine.Steppable;
 import sim.engine.SimState;
+import sim.util.Bag;
 
 import java.util.List;
 
@@ -13,11 +14,11 @@ public class SimpleEncounterModel implements Steppable {
   public void step(SimState state) {
     MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
 
-    List<Person> people = sim.people;
-    for (Person p1 : people) {
-      for (Person p2 : people) {
+    Bag people = sim.socialNetwork.getAllNodes();
+    for (Object p1 : people) {
+      for (Object p2 : people) {
         if (p1 != p2 && sim.random.nextFloat() < encounterChance) {
-          encounter(p1, p2);
+          encounter((Person) p1, (Person) p2);
         }
       }
     }
