@@ -4,26 +4,33 @@ import sim.engine.Steppable;
 import sim.engine.SimState;
 import sim.util.Double2D;
 import sim.util.MutableDouble2D;
+import sim.field.network.Edge;
 import sim.portrayal.SimplePortrayal2D;
 import sim.portrayal.DrawInfo2D;
+import sim.util.Bag;
 
 import java.util.PriorityQueue;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Map;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
 public class Person extends SimplePortrayal2D implements Steppable {
   private static final long serialVersionUID = 1;
-  private int name;
+  public int name;
+
+  private MessagePropagationSimulation sim;
 
   public Map<Person, Integer> encounterCounts = new HashMap<Person, Integer>();
 
   /** The message queue for the node. */
   public PriorityQueue<Message> messageQueue = new PriorityQueue<Message>();
 
-  public Person(int name) {
+  public Person(int name, MessagePropagationSimulation sim) {
     this.name = name;
+    this.sim = sim;
     
     if (name == 0) {
       messageQueue.add(new Message("0's message!", 1));
@@ -48,7 +55,13 @@ public class Person extends SimplePortrayal2D implements Steppable {
 
   }
 
-  public void putMessages(PriorityQueue<Message> newMessages, int otherName) {
+  public void putMessages(PriorityQueue<Message> newMessages, Person sender) {
+    Set<Object> sharedFriends = sender.findSharedFriends(this);
+    for (Object friend : sharedFriends) {
+      System.out.print(name+"/"+sender+": "+friend + ", ");
+    }
+    System.out.println();
+    int otherName = sender.name;
     for (Message m : newMessages) {
       if (!messageQueue.contains(m)) {
         messageQueue.add(m);
@@ -66,7 +79,53 @@ public class Person extends SimplePortrayal2D implements Steppable {
       count++;
       encounterCounts.put(other, count);
     } 
-    other.putMessages(messageQueue, name);
+    other.putMessages(messageQueue, this);
+  }
+
+  public Set<Person> getFriends() {
+    Bag myEdges = sim.socialNetwork.getEdges(this, null);
+    Set<Person> friends = new HashSet<Person>();
+
+    for (Object e1 : myEdges) {
+      Person from = (Person) ((Edge) e1).from();
+      Person to = (Person) ((Edge) e1).to();
+
+      if (from == this) {
+        friends.add(to);
+      } else {
+        friends.add(from);
+      }
+    }
+    return friends;
+  }
+
+  public Set<Object> findSharedFriends(Person other) {
+    Bag myEdges = sim.socialNetwork.getEdges(this, null);
+    Bag otherEdges = sim.socialNetwork.getEdges(other, null);
+
+    Set<Object> sharedFriends = new HashSet<Object>();
+    for (Object e1 : myEdges) {
+      for (Object e2 : otherEdges) {
+        // There has to be some way to do this more elegantly?
+        Object myFrom = ((Edge) e1).from();
+        Object myTo = ((Edge) e1).to();
+        Object otherFrom = ((Edge) e2).from();
+        Object otherTo = ((Edge) e2).to();
+
+        Object myFriend = (myFrom == this) ? myTo : myFrom;
+        Object otherFriend = (otherFrom == other) ? otherTo : otherFrom;
+
+        System.out.println(myFrom + " " + myTo + " " + otherFrom + " " + otherTo);
+        if (myFriend == otherFriend) {
+          sharedFriends.add(myFriend);
+        }
+      }
+    }
+    return sharedFriends;
+  }
+
+  public String toString() {
+    return "" + name;
   }
 
   protected Color noMessageColor = new Color(0,0,0);

@@ -23,7 +23,7 @@ public class ProximityEncounterModel implements Steppable {
             sim.space.getNeighborsExactlyWithinDistance(location, 
                                                         NEIGHBORHOOD_RADIUS);
       for (Object p2 : neighborhood) {
-        if (sim.random.nextDouble() < encounterChance) {
+        if (sim.random.nextDouble() < encounterChance && p1 != p2) {
           ((Person) p1).encounter((Person) p2);
         }
       }

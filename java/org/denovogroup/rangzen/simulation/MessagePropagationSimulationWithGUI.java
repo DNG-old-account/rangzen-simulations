@@ -67,10 +67,6 @@ public class MessagePropagationSimulationWithGUI extends GUIState {
       displayFrame.setVisible(true);
       display.attach(socialPortrayal, "Social");
       display.attach(spacePortrayal, "Space");  // attach the portrayals
-
-
-      // specify the backdrop color  -- what gets painted behind the displays
-      // display.setBackdrop(Color.black);
     }
 
     public static void main(String[] args) {

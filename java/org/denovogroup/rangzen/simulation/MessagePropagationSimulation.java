@@ -12,7 +12,7 @@ import java.util.List;
 public class MessagePropagationSimulation extends SimState {
   private static final long serialVersionUID = 1;
 
-  private static final int NUMBER_OF_PEOPLE = 100;
+  private static final int NUMBER_OF_PEOPLE = 10;
   public static final int width = 1000;
   public static final int height = 1000;
   public static final double discretization = 1.0;
@@ -34,7 +34,7 @@ public class MessagePropagationSimulation extends SimState {
     socialNetwork = new Network(false);
 
     for (int i=0; i<NUMBER_OF_PEOPLE; i++) {
-      Person p = new Person(i);
+      Person p = new Person(i, this);
       // Place the person somewhere near-ish the middle of the space.
       Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
           space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
@@ -57,8 +57,8 @@ public class MessagePropagationSimulation extends SimState {
   private void addRandomSocialEdges() {
     Bag people = socialNetwork.getAllNodes();
     for (Object person : people) {
-
-      // Choose a random second person
+      for (int i=0; i<5; i++) {
+      // Choose a random second person.
       Object personB = null;
       do {
         personB = people.get(random.nextInt(people.numObjs));
@@ -66,6 +66,8 @@ public class MessagePropagationSimulation extends SimState {
 
       double buddiness = 1.0;
       socialNetwork.addEdge(person, personB, new Double(buddiness));
+      System.out.println(person + " is friends with " + personB);
+      }
     }
   }
 
