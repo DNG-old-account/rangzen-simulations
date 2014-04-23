@@ -7,7 +7,11 @@ import sim.display.Console;
 import sim.engine.SimState;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;
+import sim.portrayal.network.SimpleEdgePortrayal2D;
+import sim.portrayal.network.NetworkPortrayal2D;
+import sim.portrayal.network.SpatialNetwork2D;
 import sim.util.gui.SimpleColorMap;
+
 
 import java.awt.*;
 import javax.swing.*;
@@ -16,6 +20,7 @@ public class MessagePropagationSimulationWithGUI extends GUIState {
     public Display2D display;
     public JFrame displayFrame;
     private ContinuousPortrayal2D spacePortrayal = new ContinuousPortrayal2D();
+    private NetworkPortrayal2D socialPortrayal = new NetworkPortrayal2D();
 
     public MessagePropagationSimulationWithGUI() { 
       super(new MessagePropagationSimulation(System.currentTimeMillis()));
@@ -26,10 +31,17 @@ public class MessagePropagationSimulationWithGUI extends GUIState {
      }
 
     public void setupPortrayals() {
-      // What to display.
-      spacePortrayal.setField(((MessagePropagationSimulation) state).space);
+      MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
+
+      // Display the mobility of the people.
+      spacePortrayal.setField(sim.space);
       // spacePortrayal.setPortrayalForAll(new OvalPortrayal2D(5));
 
+      // Display social edges between them.
+      socialPortrayal.setField(new SpatialNetwork2D(sim.space, sim.socialNetwork));
+      socialPortrayal.setPortrayalForAll(new SimpleEdgePortrayal2D());
+
+      // Details, details.
       display.reset();    // reschedule the displayer
       display.setBackdrop(Color.white);
       display.repaint();  // redraw the display
@@ -53,7 +65,9 @@ public class MessagePropagationSimulationWithGUI extends GUIState {
       displayFrame = display.createFrame();
       c.registerFrame(displayFrame);   // register the frame so it appears in the "Display" list
       displayFrame.setVisible(true);
+      display.attach(socialPortrayal, "Social");
       display.attach(spacePortrayal, "Space");  // attach the portrayals
+
 
       // specify the backdrop color  -- what gets painted behind the displays
       // display.setBackdrop(Color.black);
