@@ -1,2 +1,3 @@
 *.class
 buck-out
+*.swp
