@@ -41,20 +41,28 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.Set;
+import java.util.PriorityQueue;
 
 /**
  * Set of meaningless tests that demonstrate how to write JUnit tests.
  */
 @RunWith(JUnit4.class)
 public class PersonTest {
+  private static final double MESSAGE_PRIORITY = 1.0;
+  private static final String MESSAGE_CONTENT = "a message";
   MessagePropagationSimulation sim;
   Person person;
+  Person otherPerson;
+  Message message;
 
   @Before
   public void setUp() {
     sim = new MessagePropagationSimulation(System.currentTimeMillis());
     sim.start();
     person = new Person(0, sim);
+    otherPerson = new Person(100, sim);
+
+    message = new Message(MESSAGE_CONTENT, MESSAGE_PRIORITY);
   }
   /**
    * This test always passes, because it has no asserts to fail.
@@ -86,6 +94,96 @@ public class PersonTest {
 
   @Test
   public void testFriendIntersection() {
+    Person p1 = new Person(1, sim);
+    Person p2 = new Person(2, sim);
+    Person p3 = new Person(3, sim);
+
+    sim.socialNetwork.addEdge(person, p1, new Double(1.0));
+    sim.socialNetwork.addEdge(person, p2, new Double(1.0));
+    sim.socialNetwork.addEdge(otherPerson, p1, new Double(1.0));
+
+    Set<Object> sharedFriends = person.getSharedFriends(otherPerson);
+
+    assertTrue("Shared friend not in set from getSharedFriends()", sharedFriends.contains(p1));
+    assertFalse("Non-shared friend in set from getSharedFriends()", sharedFriends.contains(p2));
+  }
+
+  private boolean queueContainsMessage(PriorityQueue<Message> messages, Message soughtMessage) {
+    for (Message m : messages) {
+      if (m.equals(soughtMessage)) {
+        return true;
+      } 
+    }
+    return false;
+  }
+
+  @Test
+  public void testFriendIntersectionWithWeirdThings() {
+    Person p1 = new Person(1, sim);
+    Person p2 = new Person(2, sim);
+    Person p3 = new Person(3, sim);
+    Person p4 = new Person(4, sim);
+
+    // Add person <-> p1, person <-> p2, person <-> p3
+    // and
+    // otherPerson <-> p1, otherPerson <-> p2
+    sim.socialNetwork.addEdge(person, p1, new Double(1.0));
+    sim.socialNetwork.addEdge(person, p2, new Double(1.0));
+    sim.socialNetwork.addEdge(p1, person, new Double(1.0));
+    sim.socialNetwork.addEdge(p2, person, new Double(1.0));
+    sim.socialNetwork.addEdge(person, p3, new Double(1.0));
+    sim.socialNetwork.addEdge(p3, person, new Double(1.0));
+     
+    sim.socialNetwork.addEdge(otherPerson, p1, new Double(1.0));
+    sim.socialNetwork.addEdge(otherPerson, p2, new Double(1.0));
+    sim.socialNetwork.addEdge(p1, otherPerson, new Double(1.0));
+    sim.socialNetwork.addEdge(p2, otherPerson, new Double(1.0));
+    sim.socialNetwork.addEdge(p3, otherPerson, new Double(1.0));
+
+    Set<Object> sharedFriends = person.getSharedFriends(otherPerson);
+
+    assertTrue("Shared friend not in set from getSharedFriends() after adding twice.", sharedFriends.contains(p1));
+    assertTrue("Shared friend not in set from getSharedFriends() after adding twice.", sharedFriends.contains(p2));
+    assertTrue("Shared friend not in set from getSharedFriends() after adding twice.", sharedFriends.contains(p3));
+    assertFalse("Non-shared friend in set from getSharedFriends() after adding others twice.", sharedFriends.contains(p4));
+
+    // Add redundant edges, see what happens.
+    sim.socialNetwork.addEdge(person, p1, new Double(1.0));
+    sim.socialNetwork.addEdge(person, p1, new Double(1.0));
+    sim.socialNetwork.addEdge(person, p1, new Double(1.0));
+
+    assertTrue("Shared friend not in set from getSharedFriends() after adding a bunch of times.", sharedFriends.contains(p1));
+    assertTrue("Shared friend not in set from getSharedFriends() after adding ta bunch of times", sharedFriends.contains(p2));
+    assertTrue("Shared friend not in set from getSharedFriends() after adding ta bunch of times", sharedFriends.contains(p3));
+    assertFalse("Non-shared friend in set from getSharedFriends() after adding others twice.", sharedFriends.contains(p4));
+  }
+
+  @Test
+  public void testPutMessage() {
+    person.messageQueue.add(message);
+    otherPerson.putMessages(person.messageQueue, person);
+
+    assertTrue("putMessage() didn't transfer message.", 
+               queueContainsMessage(otherPerson.messageQueue, message));
+  }
+
+  @Test
+  public void testPutMessagePriorityZeroFriends() {
+    // Person p1 = new Person(1, sim);
+    // Person p2 = new Person(2, sim);
+    // Person p3 = new Person(3, sim);
+
+    // sim.socialNetwork.addEdge(person, p1, new Double(1.0));
+    // sim.socialNetwork.addEdge(person, p2, new Double(1.0));
+    // sim.socialNetwork.addEdge(otherPerson, p1, new Double(1.0));
+
+    person.messageQueue.add(message);
+    otherPerson.putMessages(person.messageQueue, person);
+
+    assertEquals("0 friends message transfer didn't result in epsilon trust",
+               otherPerson.messageQueue.peek().priority,
+               MESSAGE_PRIORITY * MessagePropagationSimulation.EPSILON_TRUST,
+               0.00001);
   }
 
   /**

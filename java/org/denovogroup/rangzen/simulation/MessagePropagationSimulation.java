@@ -18,6 +18,9 @@ public class MessagePropagationSimulation extends SimState {
   public static final double discretization = 1.0;
   public static final double randomMultiplier = 0.5;
 
+  public static final double EPSILON_TRUST = 0.001;
+  public static final int MAX_FRIENDS = 40;
+
   /** The social network of the people in the simulation. */
   public Network socialNetwork;
   
@@ -66,7 +69,7 @@ public class MessagePropagationSimulation extends SimState {
 
       double buddiness = 1.0;
       socialNetwork.addEdge(person, personB, new Double(buddiness));
-      System.out.println(person + " is friends with " + personB);
+      // System.out.println(person + " is friends with " + personB);
       }
     }
   }

@@ -56,16 +56,23 @@ public class Person extends SimplePortrayal2D implements Steppable {
   }
 
   public void putMessages(PriorityQueue<Message> newMessages, Person sender) {
-    Set<Object> sharedFriends = sender.findSharedFriends(this);
+    Set<Object> sharedFriends = sender.getSharedFriends(this);
     for (Object friend : sharedFriends) {
-      System.out.print(name+"/"+sender+": "+friend + ", ");
+      // System.out.print(name+"/"+sender+": "+friend + ", ");
     }
-    System.out.println();
+    // System.out.println();
     int otherName = sender.name;
+    double trustMultiplier = 
+          sharedFriends.size() / MessagePropagationSimulation.MAX_FRIENDS;
+    if (sharedFriends.size() == 0) {
+      trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
+    }
     for (Message m : newMessages) {
       if (!messageQueue.contains(m)) {
-        messageQueue.add(m);
-        System.out.println(name+"/"+otherName+": "+messageQueue.peek());
+        Message copy = m.clone();
+        copy.priority *= trustMultiplier;
+        messageQueue.add(copy);
+        // System.out.println(name+"/"+otherName+": "+messageQueue.peek());
       }
     }
   }
@@ -99,7 +106,7 @@ public class Person extends SimplePortrayal2D implements Steppable {
     return friends;
   }
 
-  public Set<Object> findSharedFriends(Person other) {
+  public Set<Object> getSharedFriends(Person other) {
     Bag myEdges = sim.socialNetwork.getEdges(this, null);
     Bag otherEdges = sim.socialNetwork.getEdges(other, null);
 
@@ -115,7 +122,7 @@ public class Person extends SimplePortrayal2D implements Steppable {
         Object myFriend = (myFrom == this) ? myTo : myFrom;
         Object otherFriend = (otherFrom == other) ? otherTo : otherFrom;
 
-        System.out.println(myFrom + " " + myTo + " " + otherFrom + " " + otherTo);
+        // System.out.println(myFrom + " " + myTo + " " + otherFrom + " " + otherTo);
         if (myFriend == otherFriend) {
           sharedFriends.add(myFriend);
         }

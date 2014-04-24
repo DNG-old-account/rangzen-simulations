@@ -7,13 +7,16 @@ public class Message implements Comparable<Message> {
   private static final int I_AM_EQUAL_TO = 0;
   private static final int I_AM_LESS_THAN = -1;
 
+  public double priority;
+  public String content;
 
-  private int priority;
-  private String content;
-
-  public Message(String content, int priority) {
+  public Message(String content, double priority) {
     this.content = content;
     this.priority = priority;
+  }
+
+  public Message clone() {
+    return new Message(content, priority);
   }
 
   public int compareTo(Message other) {
@@ -34,6 +37,16 @@ public class Message implements Comparable<Message> {
 
   public String toString() {
     return "("+priority+"): "+content;
+  }
+
+  public boolean equals(Message other) {
+    if (other == null) {
+      return false;
+    } else if (other.content.equals(this.content)) {
+      return true;
+    } else {
+     return false;
+    } 
   }
 
 }
