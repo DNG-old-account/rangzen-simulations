@@ -197,7 +197,7 @@ public class PersonTest {
       otherPerson.putMessages(person.messageQueue, person);
       assertEquals("Priority didn't work out for " + k + " friends.",
                   otherPerson.messageQueue.peek().priority,
-                  MESSAGE_PRIORITY * (k/MessagePropagationSimulation.MAX_FRIENDS),
+                  MESSAGE_PRIORITY * (k / (double) MessagePropagationSimulation.MAX_FRIENDS),
                   0.00001);
     } 
   }
@@ -240,10 +240,36 @@ public class PersonTest {
       for (Message m : otherPerson.messageQueue) {
         assertEquals("Priority didn't work out for " + k + " friends.",
                      m.priority,
-                     MESSAGE_PRIORITY * (k/MessagePropagationSimulation.MAX_FRIENDS),
+                     MESSAGE_PRIORITY * (k / (double) MessagePropagationSimulation.MAX_FRIENDS),
                      0.00001);
       }
     } 
+  }
+
+  @Test
+  public void testMaxFriendsPrioritizationPolicy() {
+    for (int sharedFriends = 1; sharedFriends<MessagePropagationSimulation.MAX_FRIENDS; sharedFriends++) {
+      assertEquals(
+          "Max friends policy wrong with " + sharedFriends + " shared friends",
+          Person.computeNewPriority_maxFriends(MESSAGE_PRIORITY, sharedFriends, sharedFriends),
+          MESSAGE_PRIORITY * (sharedFriends / (double) MessagePropagationSimulation.MAX_FRIENDS),
+          0.000001);
+    }
+  }
+
+  @Test
+  public void testFractionOfFriendsPrioritizationPolicy() {
+    for (int sharedFriends = 1; sharedFriends < MessagePropagationSimulation.MAX_FRIENDS; sharedFriends++) {
+      for (int myFriends = sharedFriends; myFriends < MessagePropagationSimulation.MAX_FRIENDS; myFriends++) {
+        double newPriority = Person.computeNewPriority_fractionOfFriends(MESSAGE_PRIORITY, 
+                                                                         sharedFriends, 
+                                                                         myFriends);
+        assertEquals("Fraction of friends policy wrong with " + sharedFriends + " / " + myFriends + " friends.",
+                     newPriority,
+                     MESSAGE_PRIORITY * (sharedFriends / (double) myFriends),
+                     0.000001);
+      }
+    }
   }
 
 

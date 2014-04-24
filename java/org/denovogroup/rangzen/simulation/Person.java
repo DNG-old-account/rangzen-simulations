@@ -75,7 +75,7 @@ public class Person extends SimplePortrayal2D implements Steppable {
     for (Message m : newMessages) {
       if (!messageQueue.contains(m)) {
         Message copy = m.clone();
-        copy.priority = computeNewPriority(m.priority, sharedFriends, getFriends());
+        copy.priority = computeNewPriority(m.priority, sharedFriends.size(), getFriends().size());
         messageQueue.add(copy);
         // System.out.println(name+"/"+otherName+": "+messageQueue.peek());
       }
@@ -83,8 +83,8 @@ public class Person extends SimplePortrayal2D implements Steppable {
   }
 
   public double computeNewPriority(double priority, 
-                                   Set<Object> sharedFriends, 
-                                   Set<Person> myFriends) {
+                                   int sharedFriends, 
+                                   int myFriends) {
     if (trustPolicy == TRUST_POLICY_FRACTION_OF_FRIENDS) {
       return computeNewPriority_fractionOfFriends(priority, sharedFriends, myFriends);
     }
@@ -96,21 +96,21 @@ public class Person extends SimplePortrayal2D implements Steppable {
     }
   }
 
-  public double computeNewPriority_maxFriends(double priority,
-                                            Set<Object> sharedFriends, 
-                                            Set<Person> myFriends) {
+  public static double computeNewPriority_maxFriends(double priority,
+                                                     int sharedFriends, 
+                                                     int myFriends) {
     double trustMultiplier =  
-            sharedFriends.size() / MessagePropagationSimulation.MAX_FRIENDS;
-    if (sharedFriends.size() == 0) {
+            sharedFriends / (double) MessagePropagationSimulation.MAX_FRIENDS;
+    if (sharedFriends == 0) {
           trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
     }
     return priority * trustMultiplier;
   } 
-  public double computeNewPriority_fractionOfFriends(double priority,
-                                                   Set<Object> sharedFriends, 
-                                                   Set<Person> myFriends) {
-    double trustMultiplier = sharedFriends.size() / myFriends.size();
-    if (sharedFriends.size() == 0) {
+  public static double computeNewPriority_fractionOfFriends(double priority,
+                                                            int sharedFriends, 
+                                                            int myFriends) {
+    double trustMultiplier = sharedFriends / (double) myFriends;
+    if (sharedFriends == 0) {
           trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
     }
     return priority * trustMultiplier;
