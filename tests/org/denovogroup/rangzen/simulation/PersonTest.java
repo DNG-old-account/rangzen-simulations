@@ -169,14 +169,6 @@ public class PersonTest {
 
   @Test
   public void testPutMessagePriorityZeroFriends() {
-    // Person p1 = new Person(1, sim);
-    // Person p2 = new Person(2, sim);
-    // Person p3 = new Person(3, sim);
-
-    // sim.socialNetwork.addEdge(person, p1, new Double(1.0));
-    // sim.socialNetwork.addEdge(person, p2, new Double(1.0));
-    // sim.socialNetwork.addEdge(otherPerson, p1, new Double(1.0));
-
     person.messageQueue.add(message);
     otherPerson.putMessages(person.messageQueue, person);
 
@@ -209,6 +201,51 @@ public class PersonTest {
                   0.00001);
     } 
   }
+
+  @Test
+  public void testPutMessageMultiplePriorityZeroFriends() {
+    person.messageQueue.add(message);
+    person.messageQueue.add(new Message("second message", 1.0));
+    person.messageQueue.add(new Message("third message", 1.0));
+
+    otherPerson.putMessages(person.messageQueue, person);
+
+    for (Message m : otherPerson.messageQueue) {
+      assertEquals("0 friends message transfer didn't result in epsilon trust",
+                   m.priority,
+                   MESSAGE_PRIORITY * MessagePropagationSimulation.EPSILON_TRUST,
+                   0.00001);
+    }
+  }
+
+  @Test
+  public void testPutMessageMultiplePriorityWithKFriends() {
+    for (int k=1; k <= MessagePropagationSimulation.MAX_FRIENDS; k++) {
+      // New persons each time.
+      person = new Person(1000, sim);
+      otherPerson = new Person(10001, sim);
+      sim.socialNetwork.clear();
+
+      for (int i=0; i<k; i++) {
+        Person pk = new Person(1001+i, sim);
+
+        sim.socialNetwork.addEdge(person, pk, new Double(1.0));
+        sim.socialNetwork.addEdge(otherPerson, pk, new Double(1.0));
+      }
+
+      person.messageQueue.add(message);
+      person.messageQueue.add(new Message("second message", 1.0));
+      person.messageQueue.add(new Message("third message", 1.0));
+      otherPerson.putMessages(person.messageQueue, person);
+      for (Message m : otherPerson.messageQueue) {
+        assertEquals("Priority didn't work out for " + k + " friends.",
+                     m.priority,
+                     MESSAGE_PRIORITY * (k/MessagePropagationSimulation.MAX_FRIENDS),
+                     0.00001);
+      }
+    } 
+  }
+
 
   /**
    * This test shouldn't show up as a pass or a fail in results, since it is
