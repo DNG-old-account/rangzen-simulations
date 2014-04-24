@@ -186,6 +186,30 @@ public class PersonTest {
                0.00001);
   }
 
+  @Test
+  public void testPutMessagePriorityWithKFriends() {
+    for (int k=1; k <= MessagePropagationSimulation.MAX_FRIENDS; k++) {
+      // New persons each time.
+      person = new Person(1000, sim);
+      otherPerson = new Person(10001, sim);
+      sim.socialNetwork.clear();
+
+      for (int i=0; i<k; i++) {
+        Person pk = new Person(1001+i, sim);
+
+        sim.socialNetwork.addEdge(person, pk, new Double(1.0));
+        sim.socialNetwork.addEdge(otherPerson, pk, new Double(1.0));
+      }
+
+      person.messageQueue.add(message);
+      otherPerson.putMessages(person.messageQueue, person);
+      assertEquals("Priority didn't work out for " + k + " friends.",
+                  otherPerson.messageQueue.peek().priority,
+                  MESSAGE_PRIORITY * (k/MessagePropagationSimulation.MAX_FRIENDS),
+                  0.00001);
+    } 
+  }
+
   /**
    * This test shouldn't show up as a pass or a fail in results, since it is
    * ignored.
