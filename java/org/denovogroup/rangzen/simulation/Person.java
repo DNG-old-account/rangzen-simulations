@@ -19,7 +19,11 @@ import java.awt.Graphics2D;
 
 public class Person extends SimplePortrayal2D implements Steppable {
   private static final long serialVersionUID = 1;
+
+  public static final String TRUST_POLICY_FRACTION_OF_FRIENDS = "FRACTION OF FRIENDS";
+  public static final String TRUST_POLICY_MAX_FRIENDS = "MAX FRIENDS";
   public int name;
+  public String trustPolicy;
 
   private MessagePropagationSimulation sim;
 
@@ -28,9 +32,10 @@ public class Person extends SimplePortrayal2D implements Steppable {
   /** The message queue for the node. */
   public PriorityQueue<Message> messageQueue = new PriorityQueue<Message>();
 
-  public Person(int name, MessagePropagationSimulation sim) {
+  public Person(int name, String trustPolicy, MessagePropagationSimulation sim) {
     this.name = name;
     this.sim = sim;
+    this.trustPolicy = trustPolicy;
     
     if (name == 0) {
       messageQueue.add(new Message("0's message!", 1));
@@ -62,20 +67,54 @@ public class Person extends SimplePortrayal2D implements Steppable {
     }
     // System.out.println();
     int otherName = sender.name;
-    double trustMultiplier = 
-          sharedFriends.size() / MessagePropagationSimulation.MAX_FRIENDS;
-    if (sharedFriends.size() == 0) {
-      trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
-    }
+    // double trustMultiplier = 
+    //       sharedFriends.size() / MessagePropagationSimulation.MAX_FRIENDS;
+    // if (sharedFriends.size() == 0) {
+    //   trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
+    // }
     for (Message m : newMessages) {
       if (!messageQueue.contains(m)) {
         Message copy = m.clone();
-        copy.priority *= trustMultiplier;
+        copy.priority = computeNewPriority(m.priority, sharedFriends, getFriends());
         messageQueue.add(copy);
         // System.out.println(name+"/"+otherName+": "+messageQueue.peek());
       }
     }
   }
+
+  public double computeNewPriority(double priority, 
+                                   Set<Object> sharedFriends, 
+                                   Set<Person> myFriends) {
+    if (trustPolicy == TRUST_POLICY_FRACTION_OF_FRIENDS) {
+      return computeNewPriority_fractionOfFriends(priority, sharedFriends, myFriends);
+    }
+    else if (trustPolicy == TRUST_POLICY_MAX_FRIENDS) {
+      return computeNewPriority_maxFriends(priority, sharedFriends, myFriends);
+    }
+    else {
+      return computeNewPriority_maxFriends(priority, sharedFriends, myFriends);
+    }
+  }
+
+  public double computeNewPriority_maxFriends(double priority,
+                                            Set<Object> sharedFriends, 
+                                            Set<Person> myFriends) {
+    double trustMultiplier =  
+            sharedFriends.size() / MessagePropagationSimulation.MAX_FRIENDS;
+    if (sharedFriends.size() == 0) {
+          trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
+    }
+    return priority * trustMultiplier;
+  } 
+  public double computeNewPriority_fractionOfFriends(double priority,
+                                                   Set<Object> sharedFriends, 
+                                                   Set<Person> myFriends) {
+    double trustMultiplier = sharedFriends.size() / myFriends.size();
+    if (sharedFriends.size() == 0) {
+          trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
+    }
+    return priority * trustMultiplier;
+  } 
 
   public void encounter(Person other) {
     Integer count = encounterCounts.get(other);

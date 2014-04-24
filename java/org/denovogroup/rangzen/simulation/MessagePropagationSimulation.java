@@ -37,7 +37,7 @@ public class MessagePropagationSimulation extends SimState {
     socialNetwork = new Network(false);
 
     for (int i=0; i<NUMBER_OF_PEOPLE; i++) {
-      Person p = new Person(i, this);
+      Person p = new Person(i, Person.TRUST_POLICY_MAX_FRIENDS, this);
       // Place the person somewhere near-ish the middle of the space.
       Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
           space.getHeight() * 0.5 + random.nextInt(100) - 0.5);

@@ -59,8 +59,8 @@ public class PersonTest {
   public void setUp() {
     sim = new MessagePropagationSimulation(System.currentTimeMillis());
     sim.start();
-    person = new Person(0, sim);
-    otherPerson = new Person(100, sim);
+    person = new Person(0, Person.TRUST_POLICY_MAX_FRIENDS, sim);
+    otherPerson = new Person(100, Person.TRUST_POLICY_MAX_FRIENDS, sim);
 
     message = new Message(MESSAGE_CONTENT, MESSAGE_PRIORITY);
   }
@@ -77,9 +77,9 @@ public class PersonTest {
    */
   @Test
   public void testGetFriends() {
-    Person p1 = new Person(1, sim);
-    Person p2 = new Person(2, sim);
-    Person p3 = new Person(3, sim);
+    Person p1 = new Person(1, Person.TRUST_POLICY_MAX_FRIENDS, sim);
+    Person p2 = new Person(2, Person.TRUST_POLICY_MAX_FRIENDS, sim);
+    Person p3 = new Person(3, Person.TRUST_POLICY_MAX_FRIENDS, sim);
 
     sim.socialNetwork.addEdge(person, p1, new Double(1.0));
     sim.socialNetwork.addEdge(person, p2, new Double(1.0));
@@ -94,9 +94,9 @@ public class PersonTest {
 
   @Test
   public void testFriendIntersection() {
-    Person p1 = new Person(1, sim);
-    Person p2 = new Person(2, sim);
-    Person p3 = new Person(3, sim);
+    Person p1 = new Person(1, Person.TRUST_POLICY_MAX_FRIENDS, sim);
+    Person p2 = new Person(2, Person.TRUST_POLICY_MAX_FRIENDS, sim);
+    Person p3 = new Person(3, Person.TRUST_POLICY_MAX_FRIENDS, sim);
 
     sim.socialNetwork.addEdge(person, p1, new Double(1.0));
     sim.socialNetwork.addEdge(person, p2, new Double(1.0));
@@ -119,10 +119,10 @@ public class PersonTest {
 
   @Test
   public void testFriendIntersectionWithWeirdThings() {
-    Person p1 = new Person(1, sim);
-    Person p2 = new Person(2, sim);
-    Person p3 = new Person(3, sim);
-    Person p4 = new Person(4, sim);
+    Person p1 = new Person(1, Person.TRUST_POLICY_MAX_FRIENDS, sim);
+    Person p2 = new Person(2, Person.TRUST_POLICY_MAX_FRIENDS, sim);
+    Person p3 = new Person(3, Person.TRUST_POLICY_MAX_FRIENDS, sim);
+    Person p4 = new Person(4, Person.TRUST_POLICY_MAX_FRIENDS, sim);
 
     // Add person <-> p1, person <-> p2, person <-> p3
     // and
@@ -182,12 +182,12 @@ public class PersonTest {
   public void testPutMessagePriorityWithKFriends() {
     for (int k=1; k <= MessagePropagationSimulation.MAX_FRIENDS; k++) {
       // New persons each time.
-      person = new Person(1000, sim);
-      otherPerson = new Person(10001, sim);
+      person = new Person(1000, Person.TRUST_POLICY_MAX_FRIENDS, sim);
+      otherPerson = new Person(10001, Person.TRUST_POLICY_MAX_FRIENDS, sim);
       sim.socialNetwork.clear();
 
       for (int i=0; i<k; i++) {
-        Person pk = new Person(1001+i, sim);
+        Person pk = new Person(1001+i, Person.TRUST_POLICY_MAX_FRIENDS, sim);
 
         sim.socialNetwork.addEdge(person, pk, new Double(1.0));
         sim.socialNetwork.addEdge(otherPerson, pk, new Double(1.0));
@@ -222,12 +222,12 @@ public class PersonTest {
   public void testPutMessageMultiplePriorityWithKFriends() {
     for (int k=1; k <= MessagePropagationSimulation.MAX_FRIENDS; k++) {
       // New persons each time.
-      person = new Person(1000, sim);
-      otherPerson = new Person(10001, sim);
+      person = new Person(1000, Person.TRUST_POLICY_MAX_FRIENDS, sim);
+      otherPerson = new Person(10001, Person.TRUST_POLICY_MAX_FRIENDS, sim);
       sim.socialNetwork.clear();
 
       for (int i=0; i<k; i++) {
-        Person pk = new Person(1001+i, sim);
+        Person pk = new Person(1001+i, Person.TRUST_POLICY_MAX_FRIENDS, sim);
 
         sim.socialNetwork.addEdge(person, pk, new Double(1.0));
         sim.socialNetwork.addEdge(otherPerson, pk, new Double(1.0));
