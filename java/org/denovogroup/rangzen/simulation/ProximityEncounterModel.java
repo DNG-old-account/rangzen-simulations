@@ -28,7 +28,7 @@ public class ProximityEncounterModel implements Steppable {
         }
       }
     }
-    System.out.println("Done stepping encounter model");
+    // System.out.println("Done stepping encounter model");
 
   }
 
