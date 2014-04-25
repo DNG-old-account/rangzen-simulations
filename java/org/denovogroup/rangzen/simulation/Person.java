@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.Map;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.io.FileNotFoundException;
+import java.util.Iterator;
 
 public class Person extends SimplePortrayal2D implements Steppable {
   private static final long serialVersionUID = 1;
@@ -24,6 +26,9 @@ public class Person extends SimplePortrayal2D implements Steppable {
   public static final String TRUST_POLICY_MAX_FRIENDS = "MAX FRIENDS";
   public int name;
   public String trustPolicy;
+  
+  public MobilityTrace mobilityTrace;
+  private Iterator<Location> mobilityIterator;
 
   private MessagePropagationSimulation sim;
 
@@ -44,10 +49,18 @@ public class Person extends SimplePortrayal2D implements Steppable {
 
   public void step(SimState state) {
     MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
-    takeRandomStep(sim);
+    // takeRandomStep(sim);
+    takeMobilityTraceStep();
 
     // TODO(lerner): Author message with some probability.
   }
+  
+  private void takeMobilityTraceStep() {
+    if (mobilityIterator.hasNext()) {
+      Location nextLocation = mobilityIterator.next();
+      sim.setObjectLatLonLocation(this, nextLocation); 
+    }
+}
   
   private void takeRandomStep(MessagePropagationSimulation sim) {
     Double2D me = sim.space.getObjectLocation(this);
@@ -168,6 +181,11 @@ public class Person extends SimplePortrayal2D implements Steppable {
       }
     }
     return sharedFriends;
+  }
+
+  public void addMobilityTrace(String filename) throws FileNotFoundException {
+    this.mobilityTrace = new MobilityTrace(filename);
+    this.mobilityIterator = mobilityTrace.iterator();
   }
 
   public String toString() {

@@ -35,9 +35,9 @@ public class MessagePropagationSimulation extends SimState {
   public void start() {
     super.start(); 
 
-    // parselocationsfile("/users/lerner/dropbox/code/dev/rangzen-simulations/new_abboip.txt");
+    // parselocationsfile("
 
-    space = new continuous2d(discretization, width, height);
+    space = new Continuous2D(discretization, width, height);
     space.clear();
 
     // False = undirected.
@@ -49,6 +49,12 @@ public class MessagePropagationSimulation extends SimState {
       Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
           space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
       space.setObjectLocation(p, randomLoc);
+
+      try {
+        p.addMobilityTrace("/Users/lerner/dropbox/code/dev/rangzen-simulations/new_abboip.txt");
+      } catch (FileNotFoundException e) {
+        // Well.
+      }
 
       // See call to add social edges below. Here people are simply
       // added as entities in the network.
@@ -79,6 +85,25 @@ public class MessagePropagationSimulation extends SimState {
       // System.out.println(person + " is friends with " + personB);
       }
     }
+  }
+
+  public void setObjectLatLonLocation(Object object, Location location) {
+    Double2D simLocation = translateLatLonToSimCoordinates(location);
+    System.out.println(simLocation);
+    space.setObjectLocation(object, simLocation); 
+  }
+
+  public Double2D translateLatLonToSimCoordinates(Location location) {
+    double HIGHEST_LATITUDE = 37.76;
+    double HIGHEST_LONGITUDE = -122.35;
+    double LOWEST_LATITUDE = 37.740;
+    double LOWEST_LONGITUDE = -122.45;
+    
+    double simX = width * (location.longitude - LOWEST_LONGITUDE)/(HIGHEST_LONGITUDE - LOWEST_LONGITUDE);
+    double simY = height * (location.latitude - LOWEST_LATITUDE)/(HIGHEST_LATITUDE - LOWEST_LATITUDE);
+    System.out.println(location);
+    System.out.println(simX + ", " + simY);
+    return new Double2D(simX, simY);
   }
 
   public MessagePropagationSimulation(long seed) {

@@ -29,4 +29,8 @@ public class Location {
     this.longitude = longitude;
     this.date = new Date(date);
   }
+
+  public String toString() {
+    return String.format("(%f, %f) @%s", latitude, longitude, date.toString());
+  }
 }

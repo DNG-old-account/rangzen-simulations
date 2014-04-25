@@ -14,10 +14,14 @@ import java.util.List;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.util.Date;
 
 public class MobilityTrace implements Iterable<Location> {
 
   private List<Location> locations;
+  public static final int INDEX_LATITUDE = 0;
+  public static final int INDEX_LONGITUDE = 1;
+  public static final int INDEX_DATE = 3;
 
   public MobilityTrace(List<Location> locations) {
     this.locations = locations;
@@ -37,15 +41,19 @@ public class MobilityTrace implements Iterable<Location> {
     CSVReader reader;
     reader = new CSVReader(new FileReader(filename), DELIMITER);
     String [] nextLine;
+    List<Location> locations = new ArrayList<Location>();
     try {
       while ((nextLine = reader.readNext()) != null) {
-        // nextLine[] is an array of values from the line
-        System.out.println(nextLine[0] + ", " + nextLine[1]);
+        double lat = Double.parseDouble(nextLine[INDEX_LATITUDE]);
+        double lon = Double.parseDouble(nextLine[INDEX_LONGITUDE]);
+        long date = Long.parseLong(nextLine[INDEX_DATE]) * 1000;
+        Location location = new Location(lat, lon, date);
+        locations.add(location);
       }
     } catch (IOException e) {
       return null;
     }
-    return null;
+    return locations;
 
   }
 }
