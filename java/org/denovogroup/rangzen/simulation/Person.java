@@ -73,6 +73,26 @@ public class Person extends SimplePortrayal2D implements Steppable {
 
   }
 
+  public boolean queueHasMessageWithContent(String soughtMessage) {
+    if (soughtMessage == null) {
+      return false;
+    }
+    for (Message m : messageQueue) {
+      if (soughtMessage.equals(m.content)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  public boolean queueHasMessageWithContent(Message message) {
+    if (message == null) {
+      return false;
+    }
+    else {
+      return queueHasMessageWithContent(message.content);
+    }
+  }
+
   public void putMessages(PriorityQueue<Message> newMessages, Person sender) {
     Set<Object> sharedFriends = sender.getSharedFriends(this);
     for (Object friend : sharedFriends) {
@@ -86,7 +106,8 @@ public class Person extends SimplePortrayal2D implements Steppable {
     //   trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
     // }
     for (Message m : newMessages) {
-      if (!messageQueue.contains(m)) {
+      // if (!messageQueue.contains(m)) {
+      if (!queueHasMessageWithContent(m)) {
         Message copy = m.clone();
         copy.priority = computeNewPriority(m.priority, sharedFriends.size(), getFriends().size());
         messageQueue.add(copy);
