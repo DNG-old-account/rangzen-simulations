@@ -1,10 +1,11 @@
 java_library(
   name = 'simulation',
-  srcs = [ 'Message.java', 'Person.java', 
+  srcs = [ 'Message.java', 'Person.java', 'Location.java', 'MobilityTrace.java',
            'MessagePropagationSimulation.java', 'MessagePropagationSimulationWithGUI.java',
            'ProximityEncounterModel.java', 'SimpleEncounterModel.java', ],
   visibility = [ 'PUBLIC' ],
   deps = [
     '//libs:mason',
+    '//libs:opencsv',
   ],
 )

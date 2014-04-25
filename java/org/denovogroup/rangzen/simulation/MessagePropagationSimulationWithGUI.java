@@ -12,7 +12,6 @@ import sim.portrayal.network.NetworkPortrayal2D;
 import sim.portrayal.network.SpatialNetwork2D;
 import sim.util.gui.SimpleColorMap;
 
-
 import java.awt.*;
 import javax.swing.*;
 
@@ -75,8 +74,6 @@ public class MessagePropagationSimulationWithGUI extends GUIState {
       Console c = new Console(mpsGUI);
       c.setVisible(true);
     }
-
-    
 
     public static String getName() { 
       return "Message Propagation Simulation"; 

@@ -6,13 +6,18 @@ import sim.util.Double2D;
 import sim.field.network.Network;
 import sim.util.Bag;
 
+import au.com.bytecode.opencsv.CSVReader;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.FileNotFoundException;
 
 public class MessagePropagationSimulation extends SimState {
   private static final long serialVersionUID = 1;
 
-  private static final int NUMBER_OF_PEOPLE = 10;
+  private static final int NUMBER_OF_PEOPLE = 1;
   public static final int width = 1000;
   public static final int height = 1000;
   public static final double discretization = 1.0;
@@ -30,7 +35,9 @@ public class MessagePropagationSimulation extends SimState {
   public void start() {
     super.start(); 
 
-    space = new Continuous2D(discretization, width, height);
+    // parselocationsfile("/users/lerner/dropbox/code/dev/rangzen-simulations/new_abboip.txt");
+
+    space = new continuous2d(discretization, width, height);
     space.clear();
 
     // False = undirected.
@@ -51,7 +58,7 @@ public class MessagePropagationSimulation extends SimState {
       schedule.scheduleRepeating(p);
     }
 
-    addRandomSocialEdges();
+    // addRandomSocialEdges();
 
     // schedule.scheduleRepeating(new SimpleEncounterModel());
     schedule.scheduleRepeating(new ProximityEncounterModel());
