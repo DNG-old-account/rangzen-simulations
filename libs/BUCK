@@ -4,6 +4,11 @@ prebuilt_jar(
   visibility = [ 'PUBLIC' ],
 )
 prebuilt_jar(
+  name = 'jcoord',
+  binary_jar = 'jcoord-1.0.jar',
+  visibility = [ 'PUBLIC' ],
+)
+prebuilt_jar(
   name = 'opencsv',
   binary_jar = 'opencsv-2.3.jar', 
   visibility = [ 'PUBLIC' ],

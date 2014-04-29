@@ -37,14 +37,13 @@ public class Person extends SimplePortrayal2D implements Steppable {
   /** The message queue for the node. */
   public PriorityQueue<Message> messageQueue = new PriorityQueue<Message>();
 
+  /** The next location to step to. */
+  private Location nextStep;
+
   public Person(int name, String trustPolicy, MessagePropagationSimulation sim) {
     this.name = name;
     this.sim = sim;
     this.trustPolicy = trustPolicy;
-    
-    if (name == 0) {
-      messageQueue.add(new Message("0's message!", 1));
-    }
   }
 
   public void step(SimState state) {
@@ -54,13 +53,34 @@ public class Person extends SimplePortrayal2D implements Steppable {
 
     // TODO(lerner): Author message with some probability.
   }
-  
-  private void takeMobilityTraceStep() {
-    if (mobilityIterator.hasNext()) {
-      Location nextLocation = mobilityIterator.next();
-      sim.setObjectLatLonLocation(this, nextLocation); 
+
+  public void schedule() {
+    int i=0;
+    for (Location location : mobilityTrace) {
+      long time = location.date.getTime();
+      sim.schedule.scheduleOnce(time, this);
+      i++;
     }
-}
+    // if (nextStep != null) {
+    //   sim.schedule.scheduleOnce(nextStep.date.getTime(), this);
+    //   return nextStep.date.getTime();
+    // }
+    // else {
+    //   return -1;
+    // }
+
+  }
+  private void takeMobilityTraceStep() {
+    if (nextStep != null) {
+      sim.setObjectLatLonLocation(this, nextStep); 
+      if (mobilityIterator.hasNext()) {
+        nextStep = mobilityIterator.next();
+      }
+      else {
+        nextStep = null;
+      }
+    }
+  }
   
   private void takeRandomStep(MessagePropagationSimulation sim) {
     Double2D me = sim.space.getObjectLocation(this);
@@ -207,6 +227,9 @@ public class Person extends SimplePortrayal2D implements Steppable {
   public void addMobilityTrace(String filename) throws FileNotFoundException {
     this.mobilityTrace = new MobilityTrace(filename);
     this.mobilityIterator = mobilityTrace.iterator();
+    if (mobilityIterator.hasNext()) {
+      nextStep = mobilityIterator.next();
+    }
   }
 
   public String toString() {

@@ -19,7 +19,7 @@ import java.util.Iterator;
 public class MessagePropagationSimulation extends SimState {
   private static final long serialVersionUID = 1;
 
-  private static final int NUMBER_OF_PEOPLE = 20;
+  private static final int NUMBER_OF_PEOPLE = 5;
   public static final int width = 1000;
   public static final int height = 1000;
   public static final double discretization = 1.0;
@@ -34,6 +34,9 @@ public class MessagePropagationSimulation extends SimState {
   
   /** Physical space in which mobility happens. */
   public Continuous2D space;
+
+  /** The agent which measures the simulation and reports statistics on it. */
+  public SingleMessageTrackingMeasurer measurer;
 
   public void start() {
     super.start(); 
@@ -65,6 +68,7 @@ public class MessagePropagationSimulation extends SimState {
       try {
         p.addMobilityTrace(traceIterator.next());
       } catch (FileNotFoundException e) {
+        System.err.println(e);
         // Well.
       }
 
@@ -73,13 +77,18 @@ public class MessagePropagationSimulation extends SimState {
       socialNetwork.addNode(p);
 
       // Schedule the person to move, author messages, etc.
-      schedule.scheduleRepeating(p);
+      // schedule.scheduleRepeating(p);
+      p.schedule();
+
     }
 
     // addRandomSocialEdges();
 
     // schedule.scheduleRepeating(new SimpleEncounterModel());
-    schedule.scheduleRepeating(new ProximityEncounterModel());
+    schedule.scheduleOnce(new ProximityEncounterModel());
+
+    measurer = new SingleMessageTrackingMeasurer(this);
+    schedule.scheduleOnce(measurer);     
   }
 
   private void addRandomSocialEdges() {

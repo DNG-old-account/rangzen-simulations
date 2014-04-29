@@ -44,7 +44,7 @@ import java.util.Set;
 import java.util.PriorityQueue;
 
 /**
- * Set of meaningless tests that demonstrate how to write JUnit tests.
+ * Tests for the Person class in the Rangzen simulations.
  */
 @RunWith(JUnit4.class)
 public class PersonTest {
