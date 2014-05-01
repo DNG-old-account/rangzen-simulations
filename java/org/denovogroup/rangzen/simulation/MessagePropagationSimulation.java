@@ -32,8 +32,8 @@ public class MessagePropagationSimulation extends SimState {
   public static final double LOWEST_LATITUDE = 37.65;
   public static final double LOWEST_LONGITUDE = -122.55;
     
-  public static final int width = 1000;
-  public static final int height = 1000;
+  public static final int width = 26300;
+  public static final int height = 33360;
   public static final double discretization = 
           ProximityEncounterModel.NEIGHBORHOOD_RADIUS * 2;
   public static final double randomMultiplier = 0.5;
@@ -79,12 +79,13 @@ public class MessagePropagationSimulation extends SimState {
     for (int i=0; i<NUMBER_OF_PEOPLE; i++) {
       Person p = new Person(i, Person.TRUST_POLICY_MAX_FRIENDS, this);
       // Place the person somewhere near-ish the middle of the space.
-      Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
-          space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
-      space.setObjectLocation(p, randomLoc);
+      // Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
+      //     space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
+      // space.setObjectLocation(p, randomLoc);
 
       try {
         p.addMobilityTrace(traceIterator.next());
+        setObjectLatLonLocation(p, p.mobilityTrace.locations.get(0));
       } catch (FileNotFoundException e) {
         System.err.println(e);
         // Well.
