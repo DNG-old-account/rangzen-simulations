@@ -24,10 +24,11 @@ import java.util.Iterator;
 public class MessagePropagationSimulation extends SimState {
   private static final long serialVersionUID = 1;
 
-  private static final int NUMBER_OF_PEOPLE = 500;
+  public static final int NUMBER_OF_PEOPLE = 50;
   public static final int width = 1000;
   public static final int height = 1000;
-  public static final double discretization = 1.0;
+  public static final double discretization = 
+          ProximityEncounterModel.NEIGHBORHOOD_RADIUS * 2;
   public static final double randomMultiplier = 0.5;
   public static final String traceIndexFilename = "data/cabdatafiles.txt";
 

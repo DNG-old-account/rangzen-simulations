@@ -19,6 +19,10 @@ public class SingleMessageTrackingMeasurer implements Steppable {
   private MessagePropagationSimulation sim;
   private Message trackedMessage;
 
+  private int maxPropagationSeen = 0;
+  private double maxTimeSeen = 0;
+  private double minTimeSeen = Double.MAX_VALUE;
+
   // Storages the history of message propgation.
   Map<Double, Integer> timestepToPropagation;
 
@@ -45,7 +49,16 @@ public class SingleMessageTrackingMeasurer implements Steppable {
         seenTrackedMessageCount++;
       }
     }
-    timestepToPropagation.put(time, seenTrackedMessageCount);
+    if (seenTrackedMessageCount > maxPropagationSeen) {
+      timestepToPropagation.put(time, seenTrackedMessageCount);
+      maxPropagationSeen = seenTrackedMessageCount;
+    }
+    if (time > maxTimeSeen) {
+      maxTimeSeen = time;
+    }
+    if (time < minTimeSeen) {
+      minTimeSeen = time;
+    }
 
     // System.out.println(String.format("%f: %d", time, seenTrackedMessageCount));
     // System.out.println(getMeasurementsAsJSON());
@@ -59,9 +72,25 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     }
   }
 
+  private class OutputData {
+    public Map<Double, Integer> propagationData;
+    public int NUMBER_OF_PEOPLE;
+    public double minTimeSeen;
+    public double maxTimeSeen;
+    public double NEIGHBORHOOD_RADIUS;
+    public double ENCOUNTER_CHANCE;
+  }
   public String getMeasurementsAsJSON() {
+    OutputData o = new OutputData();
+    o.propagationData = timestepToPropagation;
+    o.minTimeSeen = minTimeSeen;
+    o.maxTimeSeen = maxTimeSeen;
+    o.NEIGHBORHOOD_RADIUS = ProximityEncounterModel.NEIGHBORHOOD_RADIUS;
+    o.ENCOUNTER_CHANCE = ProximityEncounterModel.ENCOUNTER_CHANCE;
+    o.NUMBER_OF_PEOPLE = MessagePropagationSimulation.NUMBER_OF_PEOPLE;
+
     Gson gson = new GsonBuilder().create();
-    String json = gson.toJson(timestepToPropagation);
+    String json = gson.toJson(o);
     // System.out.println(json);
     return json;
   }
