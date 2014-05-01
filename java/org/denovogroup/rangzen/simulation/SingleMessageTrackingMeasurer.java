@@ -60,6 +60,10 @@ public class SingleMessageTrackingMeasurer implements Steppable {
       minTimeSeen = time;
     }
 
+    if (seenTrackedMessageCount == MessagePropagationSimulation.NUMBER_OF_PEOPLE) {
+      sim.schedule.clear();
+    }
+
     // System.out.println(String.format("%f: %d", time, seenTrackedMessageCount));
     // System.out.println(getMeasurementsAsJSON());
   }
