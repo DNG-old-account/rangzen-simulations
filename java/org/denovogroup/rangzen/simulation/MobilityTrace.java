@@ -14,11 +14,12 @@ import java.util.List;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.util.Date;
 
-public class MobilityTrace implements Iterable<Location> {
+public class MobilityTrace implements Iterable<Location>, Serializable {
 
-  private List<Location> locations;
+  public List<Location> locations;
   public static final int INDEX_LATITUDE = 0;
   public static final int INDEX_LONGITUDE = 1;
   public static final int INDEX_DATE = 3;

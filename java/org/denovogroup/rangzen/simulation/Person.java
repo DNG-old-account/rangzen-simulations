@@ -28,7 +28,8 @@ public class Person extends SimplePortrayal2D implements Steppable {
   public String trustPolicy;
   
   public MobilityTrace mobilityTrace;
-  private Iterator<Location> mobilityIterator;
+  // private Iterator<Location> mobilityIterator;
+  private int nextStepIndex = 0;
 
   private MessagePropagationSimulation sim;
 
@@ -65,8 +66,10 @@ public class Person extends SimplePortrayal2D implements Steppable {
   private void takeMobilityTraceStep() {
     if (nextStep != null) {
       sim.setObjectLatLonLocation(this, nextStep); 
-      if (mobilityIterator.hasNext()) {
-        nextStep = mobilityIterator.next();
+      nextStepIndex++;
+      if (nextStepIndex < mobilityTrace.locations.size()) {
+        // nextStep = mobilityIterator.next();
+        nextStep = mobilityTrace.locations.get(nextStepIndex);
       }
       else {
         nextStep = null;
@@ -218,9 +221,12 @@ public class Person extends SimplePortrayal2D implements Steppable {
 
   public void addMobilityTrace(String filename) throws FileNotFoundException {
     this.mobilityTrace = new MobilityTrace(filename);
-    this.mobilityIterator = mobilityTrace.iterator();
-    if (mobilityIterator.hasNext()) {
-      nextStep = mobilityIterator.next();
+    // this.mobilityIterator = mobilityTrace.iterator();
+    // if (mobilityIterator.hasNext()) {
+    if (mobilityTrace.locations.size() > 0) {
+      // nextStep = mobilityIterator.next();
+      nextStep = mobilityTrace.locations.get(nextStepIndex);
+      nextStepIndex++;
     }
   }
 
