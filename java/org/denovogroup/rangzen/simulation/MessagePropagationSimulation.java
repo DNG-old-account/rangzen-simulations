@@ -41,7 +41,7 @@ public class MessagePropagationSimulation extends SimState {
   public Continuous2D space;
 
   /** The agent which measures the simulation and reports statistics on it. */
-  public SingleMessageTrackingMeasurer measurer;
+  public Steppable measurer = new SingleMessageTrackingMeasurer(this);
 
   public void start() {
     super.start(); 
@@ -63,7 +63,6 @@ public class MessagePropagationSimulation extends SimState {
 
     Iterator<String> traceIterator = locationTraceFilenames.iterator();
 
-    measurer = new SingleMessageTrackingMeasurer(this);
     schedule.scheduleOnce(measurer);     
 
     for (int i=0; i<NUMBER_OF_PEOPLE; i++) {
