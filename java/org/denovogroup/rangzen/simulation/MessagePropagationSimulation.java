@@ -1,6 +1,8 @@
 package org.denovogroup.rangzen.simulation;
 
+import sim.engine.Sequence;
 import sim.engine.SimState;
+import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.field.network.Network;
 import sim.util.Bag;
@@ -28,6 +30,9 @@ public class MessagePropagationSimulation extends SimState {
 
   public static final double EPSILON_TRUST = 0.001;
   public static final int MAX_FRIENDS = 40;
+
+  /** The encounter model in use. */
+  Steppable encounterModel = new ProximityEncounterModel();
 
   /** The social network of the people in the simulation. */
   public Network socialNetwork;
@@ -58,6 +63,9 @@ public class MessagePropagationSimulation extends SimState {
 
     Iterator<String> traceIterator = locationTraceFilenames.iterator();
 
+    measurer = new SingleMessageTrackingMeasurer(this);
+    schedule.scheduleOnce(measurer);     
+
     for (int i=0; i<NUMBER_OF_PEOPLE; i++) {
       Person p = new Person(i, Person.TRUST_POLICY_MAX_FRIENDS, this);
       // Place the person somewhere near-ish the middle of the space.
@@ -85,10 +93,8 @@ public class MessagePropagationSimulation extends SimState {
     // addRandomSocialEdges();
 
     // schedule.scheduleRepeating(new SimpleEncounterModel());
-    schedule.scheduleOnce(new ProximityEncounterModel());
+    // schedule.scheduleOnce(new ProximityEncounterModel());
 
-    measurer = new SingleMessageTrackingMeasurer(this);
-    schedule.scheduleOnce(measurer);     
   }
 
   private void addRandomSocialEdges() {
@@ -140,6 +146,15 @@ public class MessagePropagationSimulation extends SimState {
       System.err.println(e);
     }
     return locationTraceFilenames;
+  }
+
+  public void schedulePerson(Person person, double time) {
+    Steppable[] steps = new Steppable[3];
+    steps[0] = person;
+    steps[1] = measurer;
+    steps[2] = encounterModel;
+    Sequence sequence = new Sequence(steps);
+    schedule.scheduleOnce(time, sequence);
   }
 
   public MessagePropagationSimulation(long seed) {

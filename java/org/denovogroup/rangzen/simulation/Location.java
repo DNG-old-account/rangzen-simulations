@@ -9,11 +9,13 @@ import sim.util.Bag;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Location {
+
+public class Location implements Serializable {
   public double latitude;
   public double longitude;
   public Date date;

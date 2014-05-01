@@ -4,9 +4,13 @@ import sim.engine.Steppable;
 import sim.engine.SimState;
 import sim.util.Bag;
 
+// import com.google.gson;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
 
 public class SingleMessageTrackingMeasurer implements Steppable {
   private static final long serialVersionUID = 1;
@@ -15,16 +19,17 @@ public class SingleMessageTrackingMeasurer implements Steppable {
   private Message trackedMessage;
 
   // Storages the history of message propgation.
-  List<Integer> seenTrackedMessageCountsPerTimestep;
+  Map<Double, Integer> timestepToPropagation;
 
   public SingleMessageTrackingMeasurer(MessagePropagationSimulation sim) {
     this.sim = sim;
     this.trackedMessage = new Message(UUID.randomUUID().toString(), 1.0);
-    this.seenTrackedMessageCountsPerTimestep = new ArrayList<Integer>();
+    this.timestepToPropagation = new HashMap<Double, Integer>();
   }
 
   public void step(SimState state) {
     MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
+    double time = sim.schedule.getTime();
 
     if (sim.schedule.getSteps() == 0) {
       authorMessage();
@@ -39,7 +44,9 @@ public class SingleMessageTrackingMeasurer implements Steppable {
         seenTrackedMessageCount++;
       }
     }
-    seenTrackedMessageCountsPerTimestep.add(seenTrackedMessageCount);
+    timestepToPropagation.put(time, seenTrackedMessageCount);
+
+    System.out.println(String.format("%f: %d", time, seenTrackedMessageCount));
   }
 
   private void authorMessage() {

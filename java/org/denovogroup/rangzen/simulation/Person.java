@@ -55,21 +55,13 @@ public class Person extends SimplePortrayal2D implements Steppable {
   }
 
   public void schedule() {
-    int i=0;
     for (Location location : mobilityTrace) {
       long time = location.date.getTime();
-      sim.schedule.scheduleOnce(time, this);
-      i++;
+      // sim.schedule.scheduleOnce(time, meAndMeasurer);
+      sim.schedulePerson(this, time);
     }
-    // if (nextStep != null) {
-    //   sim.schedule.scheduleOnce(nextStep.date.getTime(), this);
-    //   return nextStep.date.getTime();
-    // }
-    // else {
-    //   return -1;
-    // }
-
   }
+    
   private void takeMobilityTraceStep() {
     if (nextStep != null) {
       sim.setObjectLatLonLocation(this, nextStep); 

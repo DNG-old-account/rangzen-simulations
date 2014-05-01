@@ -26,3 +26,8 @@ prebuilt_jar(
   visibility = [ 'PUBLIC' ],
 )
 
+prebuilt_jar(
+  name = 'gson',
+  binary_jar = 'gson-2.2.4.jar',
+  visibility = [ 'PUBLIC' ],
+)
