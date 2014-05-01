@@ -10,6 +10,8 @@ import sim.util.Double2D;
 
 import au.com.bytecode.opencsv.CSVReader;
 
+import uk.me.jstott.jcoord.LatLng;
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -25,6 +27,11 @@ public class MessagePropagationSimulation extends SimState {
   private static final long serialVersionUID = 1;
 
   public static final int NUMBER_OF_PEOPLE = 50;
+  public static final double HIGHEST_LATITUDE = 37.95;
+  public static final double HIGHEST_LONGITUDE = -122.25;
+  public static final double LOWEST_LATITUDE = 37.65;
+  public static final double LOWEST_LONGITUDE = -122.55;
+    
   public static final int width = 1000;
   public static final int height = 1000;
   public static final double discretization = 
@@ -141,14 +148,34 @@ public class MessagePropagationSimulation extends SimState {
     space.setObjectLocation(object, simLocation); 
   }
 
+  /**
+   * Transforms a location (with latitude/longitude coordinates) into
+   * a place on the simulation's continuous 2D space. The coordinates
+   * of the simulation's space are in meters.
+   *
+   * @param location A Location object to be transformed into simulation
+   * space.
+   * @return A Double2D with simulation coordinates corresponding to the
+   * given Location, or null if location is null.
+   */
   public Double2D translateLatLonToSimCoordinates(Location location) {
-    double HIGHEST_LATITUDE = 37.95;
-    double HIGHEST_LONGITUDE = -122.25;
-    double LOWEST_LATITUDE = 37.65;
-    double LOWEST_LONGITUDE = -122.55;
-    
-    double simX = width * (location.longitude - LOWEST_LONGITUDE)/(HIGHEST_LONGITUDE - LOWEST_LONGITUDE);
-    double simY = height * (location.latitude - LOWEST_LATITUDE)/(HIGHEST_LATITUDE - LOWEST_LATITUDE);
+    if (location == null) {
+      return null;
+    }
+
+    double simX;
+    double simY;
+
+    LatLng origin = new LatLng(LOWEST_LATITUDE, LOWEST_LONGITUDE);
+    LatLng cornerA = new LatLng(LOWEST_LATITUDE, location.longitude);
+    LatLng cornerB = new LatLng(location.latitude, LOWEST_LONGITUDE);
+
+    simX = origin.distance(cornerA);
+    simY = origin.distance(cornerB);
+
+    // Old method assumed non-spherical earth.
+    // double simX = width * (location.longitude - LOWEST_LONGITUDE)/(HIGHEST_LONGITUDE - LOWEST_LONGITUDE);
+    // double simY = height * (location.latitude - LOWEST_LATITUDE)/(HIGHEST_LATITUDE - LOWEST_LATITUDE);
     // System.out.println(location);
     // System.out.println(simX + ", " + simY);
     return new Double2D(simX, simY);

@@ -6,6 +6,7 @@ java_library(
            'SingleMessageTrackingMeasurer.java', ],
   visibility = [ 'PUBLIC' ],
   deps = [
+    '//libs:jcoord',
     '//libs:mason',
     '//libs:opencsv',
     '//libs:gson',

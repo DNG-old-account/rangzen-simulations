@@ -1,6 +1,8 @@
 package org.denovogroup.rangzen.simulation;
 
-public class Message implements Comparable<Message> {
+import java.io.Serializable;
+
+public class Message implements Serializable, Comparable<Message> {
   private static final long serialVersionUID = 1;
 
   private static final int I_AM_GREATER_THAN = 1;
