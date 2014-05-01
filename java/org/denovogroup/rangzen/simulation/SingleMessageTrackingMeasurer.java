@@ -4,7 +4,8 @@ import sim.engine.Steppable;
 import sim.engine.SimState;
 import sim.util.Bag;
 
-// import com.google.gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class SingleMessageTrackingMeasurer implements Steppable {
 
     if (sim.schedule.getSteps() == 0) {
       authorMessage();
-      System.out.println("authored message"+sim.schedule.getSteps());
+      // System.out.println("authored message"+sim.schedule.getSteps());
     }
 
     Bag people = sim.socialNetwork.getAllNodes();
@@ -46,7 +47,8 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     }
     timestepToPropagation.put(time, seenTrackedMessageCount);
 
-    System.out.println(String.format("%f: %d", time, seenTrackedMessageCount));
+    // System.out.println(String.format("%f: %d", time, seenTrackedMessageCount));
+    // System.out.println(getMeasurementsAsJSON());
   }
 
   private void authorMessage() {
@@ -55,6 +57,13 @@ public class SingleMessageTrackingMeasurer implements Steppable {
       Person person = (Person) people.objs[0];
       person.messageQueue.add(trackedMessage);
     }
+  }
+
+  public String getMeasurementsAsJSON() {
+    Gson gson = new GsonBuilder().create();
+    String json = gson.toJson(timestepToPropagation);
+    // System.out.println(json);
+    return json;
   }
 
   private void encounter(Person p1, Person p2) {

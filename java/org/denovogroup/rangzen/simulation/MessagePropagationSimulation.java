@@ -12,7 +12,10 @@ import au.com.bytecode.opencsv.CSVReader;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.File;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +24,7 @@ import java.util.Iterator;
 public class MessagePropagationSimulation extends SimState {
   private static final long serialVersionUID = 1;
 
-  private static final int NUMBER_OF_PEOPLE = 5;
+  private static final int NUMBER_OF_PEOPLE = 500;
   public static final int width = 1000;
   public static final int height = 1000;
   public static final double discretization = 1.0;
@@ -94,6 +97,24 @@ public class MessagePropagationSimulation extends SimState {
     // schedule.scheduleRepeating(new SimpleEncounterModel());
     // schedule.scheduleOnce(new ProximityEncounterModel());
 
+  }
+
+  public void finish() {
+    String filename = "data.json";
+    String jsonOutput = ((SingleMessageTrackingMeasurer) measurer).getMeasurementsAsJSON();
+    try {
+      File outfile = new File(filename);
+      if (!outfile.exists()) {
+        outfile.createNewFile();
+      }
+      FileWriter fw = new FileWriter(outfile.getAbsoluteFile());
+      BufferedWriter bw  = new BufferedWriter(fw);
+      bw.write(jsonOutput);
+      bw.close(); 
+      System.err.println("Outputted run data to " + filename);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private void addRandomSocialEdges() {
