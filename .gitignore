@@ -1,3 +1,4 @@
 *.class
 buck-out
 *.swp
+*.checkpoint
