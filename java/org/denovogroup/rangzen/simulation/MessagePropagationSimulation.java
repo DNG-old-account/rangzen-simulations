@@ -172,7 +172,7 @@ public class MessagePropagationSimulation extends SimState {
     LatLng cornerB = new LatLng(location.latitude, LOWEST_LONGITUDE);
 
     simX = origin.distance(cornerA);
-    simY = origin.distance(cornerB);
+    simY = height - origin.distance(cornerB);
 
     // Old method assumed non-spherical earth.
     // double simX = width * (location.longitude - LOWEST_LONGITUDE)/(HIGHEST_LONGITUDE - LOWEST_LONGITUDE);
