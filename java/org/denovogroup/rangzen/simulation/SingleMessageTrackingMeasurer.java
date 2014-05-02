@@ -56,7 +56,7 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     if (time > maxTimeSeen) {
       maxTimeSeen = time;
     }
-    if (time < minTimeSeen) {
+    if (time < minTimeSeen && time != 0) {
       minTimeSeen = time;
     }
 
