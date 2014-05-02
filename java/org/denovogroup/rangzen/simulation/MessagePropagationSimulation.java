@@ -111,21 +111,22 @@ public class MessagePropagationSimulation extends SimState {
   }
 
   public void finish() {
-    String filename = "data.json";
+    // String filename = "data.json";
     String jsonOutput = ((SingleMessageTrackingMeasurer) measurer).getMeasurementsAsJSON();
-    try {
-      File outfile = new File(filename);
-      if (!outfile.exists()) {
-        outfile.createNewFile();
-      }
-      FileWriter fw = new FileWriter(outfile.getAbsoluteFile());
-      BufferedWriter bw  = new BufferedWriter(fw);
-      bw.write(jsonOutput);
-      bw.close(); 
-      System.err.println("Outputted run data to " + filename);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    System.out.println(jsonOutput);
+    // try {
+    //   File outfile = new File(filename);
+    //   if (!outfile.exists()) {
+    //     outfile.createNewFile();
+    //   }
+    //   FileWriter fw = new FileWriter(outfile.getAbsoluteFile());
+    //   BufferedWriter bw  = new BufferedWriter(fw);
+    //   bw.write(jsonOutput);
+    //   bw.close(); 
+    //   System.err.println("Outputted run data to " + filename);
+    // } catch (IOException e) {
+    //   e.printStackTrace();
+    // }
   }
 
   private void addRandomSocialEdges() {

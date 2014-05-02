@@ -37,7 +37,7 @@ public class MobilityTrace implements Iterable<Location>, Serializable {
   }
 
   private List<Location> parseLocationsFile(String filename) throws FileNotFoundException {
-    System.out.println("Parsing " + filename);
+    System.err.println("Parsing " + filename);
     char DELIMITER = ' ';
     CSVReader reader;
     reader = new CSVReader(new FileReader(filename), DELIMITER);
