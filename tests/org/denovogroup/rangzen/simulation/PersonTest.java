@@ -64,13 +64,6 @@ public class PersonTest {
 
     message = new Message(MESSAGE_CONTENT, MESSAGE_PRIORITY);
   }
-  /**
-   * This test always passes, because it has no asserts to fail.
-   */
-  @Test
-  public void thisAlwaysPasses() {
-
-  }
 
   /**
    * Ensure that get friends returns all the friends in the graph.
@@ -262,12 +255,12 @@ public class PersonTest {
     for (int sharedFriends = 1; sharedFriends < MessagePropagationSimulation.MAX_FRIENDS; sharedFriends++) {
       for (int myFriends = sharedFriends; myFriends < MessagePropagationSimulation.MAX_FRIENDS; myFriends++) {
         double newPriority = Person.computeNewPriority_fractionOfFriends(MESSAGE_PRIORITY, 
-                                                                         sharedFriends, 
-                                                                         myFriends);
+            sharedFriends, 
+            myFriends);
         assertEquals("Fraction of friends policy wrong with " + sharedFriends + " / " + myFriends + " friends.",
-                     newPriority,
-                     MESSAGE_PRIORITY * (sharedFriends / (double) myFriends),
-                     0.000001);
+            newPriority,
+            MESSAGE_PRIORITY * (sharedFriends / (double) myFriends),
+            0.000001);
       }
     }
   }

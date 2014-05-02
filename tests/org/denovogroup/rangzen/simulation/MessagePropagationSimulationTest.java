@@ -95,5 +95,4 @@ public class MessagePropagationSimulationTest {
                  oppositeCorner.y, 
                  100);
   }
-
 }
