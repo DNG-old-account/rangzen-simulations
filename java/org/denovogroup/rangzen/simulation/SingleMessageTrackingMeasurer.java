@@ -49,7 +49,8 @@ public class SingleMessageTrackingMeasurer implements Steppable {
         seenTrackedMessageCount++;
       }
     }
-    if (seenTrackedMessageCount > maxPropagationSeen) {
+    if (seenTrackedMessageCount > maxPropagationSeen && 
+        time != 0) {
       timestepToPropagation.put(time, seenTrackedMessageCount);
       maxPropagationSeen = seenTrackedMessageCount;
     }
