@@ -31,6 +31,8 @@ public class MessagePropagationSimulation extends SimState {
   public static final double HIGHEST_LONGITUDE = -122.25;
   public static final double LOWEST_LATITUDE = 37.65;
   public static final double LOWEST_LONGITUDE = -122.55;
+
+  public static final double METERS_PER_KILOMETER = 1000.0;
     
   public static final int width = 26300;
   public static final int height = 33360;
@@ -171,8 +173,8 @@ public class MessagePropagationSimulation extends SimState {
     LatLng cornerA = new LatLng(LOWEST_LATITUDE, location.longitude);
     LatLng cornerB = new LatLng(location.latitude, LOWEST_LONGITUDE);
 
-    simX = origin.distance(cornerA);
-    simY = height - origin.distance(cornerB);
+    simX = origin.distance(cornerA) * METERS_PER_KILOMETER;
+    simY = height - origin.distance(cornerB) * METERS_PER_KILOMETER;
 
     // Old method assumed non-spherical earth.
     // double simX = width * (location.longitude - LOWEST_LONGITUDE)/(HIGHEST_LONGITUDE - LOWEST_LONGITUDE);

@@ -54,8 +54,8 @@ import java.util.PriorityQueue;
 @RunWith(JUnit4.class)
 public class MessagePropagationSimulationTest {
   private MessagePropagationSimulation sim;
-  private double DELTA = 0.001;
-  private double OPPOSITE_CORNER_Y = 33360;
+  private double DELTA = 1;
+  private double OPPOSITE_CORNER_Y = 0;
   private double OPPOSITE_CORNER_X = 26300;
   private static final double METERS_PER_KILOMETER = 1000;
 
@@ -72,7 +72,10 @@ public class MessagePropagationSimulationTest {
                          0);
     Double2D origin = sim.translateLatLonToSimCoordinates(originLocation);
     assertEquals("Lowest lon not at x=0 meters", origin.x, 0, DELTA);
-    assertEquals("Lowest lat not at y=0 meters", origin.y, 0, DELTA);
+    assertEquals("Lowest lat not at y=0 meters", 
+                 origin.y,
+                 MessagePropagationSimulation.height,
+                 DELTA);
 
     Location oppositeCornerLocation = 
             new Location(MessagePropagationSimulation.HIGHEST_LATITUDE, 
@@ -83,20 +86,14 @@ public class MessagePropagationSimulationTest {
     // Margin of error of 100 meters because the tool used to calculate
     // the "correct" value only gives precision out to 100 meters.
     // (http://www.movable-type.co.uk/scripts/latlong.html)
-    assertEquals("Lowest lon not at correct meter location", 
+    assertEquals("Highest lon not at correct meter location", 
                  OPPOSITE_CORNER_X,
-                 oppositeCorner.x * METERS_PER_KILOMETER, 
+                 oppositeCorner.x,
                  100);
-    assertEquals("Lowest lat not at correct meter location", 
+    assertEquals("Highest lat not at correct meter location", 
                  OPPOSITE_CORNER_Y,
-                 oppositeCorner.y * METERS_PER_KILOMETER,
+                 oppositeCorner.y, 
                  100);
-
-
-      
-      
-
-
   }
 
 }

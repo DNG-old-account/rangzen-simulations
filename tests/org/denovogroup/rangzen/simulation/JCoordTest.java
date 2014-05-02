@@ -52,10 +52,18 @@ import java.util.PriorityQueue;
 @RunWith(JUnit4.class)
 public class JCoordTest {
   public static final double METERS_PER_KILOMETER = 1000.0;
+  public static final double DELTA = 5.0;
   @Before
   public void setUp() {
   }
 
+  private void testKnownPoints(LatLng a, LatLng b, double distance) {
+    assertEquals("Points a and b not the claimed distance apart.",
+                 distance,
+                 a.distance(b) * METERS_PER_KILOMETER,
+                 DELTA);
+    
+  }
   @Test
   public void someKnownCrowDistances() {
 
