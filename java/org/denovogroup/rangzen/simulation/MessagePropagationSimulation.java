@@ -26,7 +26,7 @@ import java.util.Iterator;
 public class MessagePropagationSimulation extends SimState {
   private static final long serialVersionUID = 1;
 
-  public static final int NUMBER_OF_PEOPLE = 50;
+  public static final int NUMBER_OF_PEOPLE = 500;
   public static final double HIGHEST_LATITUDE = 37.95;
   public static final double HIGHEST_LONGITUDE = -122.25;
   public static final double LOWEST_LATITUDE = 37.65;
