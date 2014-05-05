@@ -10,7 +10,7 @@ import java.util.List;
 public class ProximityEncounterModel implements Steppable {
   private static final long serialVersionUID = 1;
 
-  public static final double NEIGHBORHOOD_RADIUS = 100;
+  public static final double NEIGHBORHOOD_RADIUS = 20;
   public static final double ENCOUNTER_CHANCE = 0.05;
 
   public void step(SimState state) {

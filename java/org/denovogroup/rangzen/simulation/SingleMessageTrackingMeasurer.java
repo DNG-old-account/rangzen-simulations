@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.Gson;
 
 import java.util.List;
+import java.util.Random;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.Map;
@@ -71,9 +72,12 @@ public class SingleMessageTrackingMeasurer implements Steppable {
 
   private void authorMessage() {
     Bag people = sim.socialNetwork.getAllNodes();
+    // Random randomGenerator = new Random();
     if (people.numObjs > 0) {
       Person person = (Person) people.objs[0];
-      person.messageQueue.add(trackedMessage);
+      // Person person = (Person) people.objs[randomGenerator.nextInt(people.numObjs)];
+      person.addMessageToQueue(trackedMessage);
+      
     }
   }
 
@@ -84,6 +88,7 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     public double maxTimeSeen;
     public double NEIGHBORHOOD_RADIUS;
     public double ENCOUNTER_CHANCE;
+    public double priority;
   }
   public String getMeasurementsAsJSON() {
     OutputData o = new OutputData();
@@ -93,6 +98,7 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     o.NEIGHBORHOOD_RADIUS = ProximityEncounterModel.NEIGHBORHOOD_RADIUS;
     o.ENCOUNTER_CHANCE = ProximityEncounterModel.ENCOUNTER_CHANCE;
     o.NUMBER_OF_PEOPLE = MessagePropagationSimulation.NUMBER_OF_PEOPLE;
+    o.priority = 1;
 
     Gson gson = new GsonBuilder().create();
     String json = gson.toJson(o);

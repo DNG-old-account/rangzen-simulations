@@ -26,7 +26,7 @@ import java.util.Iterator;
 public class MessagePropagationSimulation extends SimState {
   private static final long serialVersionUID = 1;
 
-  public static final int NUMBER_OF_PEOPLE = 500;
+  public static final int NUMBER_OF_PEOPLE = 50;
   public static final double HIGHEST_LATITUDE = 37.95;
   public static final double HIGHEST_LONGITUDE = -122.25;
   public static final double LOWEST_LATITUDE = 37.65;
@@ -79,7 +79,7 @@ public class MessagePropagationSimulation extends SimState {
     schedule.scheduleOnce(measurer);     
 
     for (int i=0; i<NUMBER_OF_PEOPLE; i++) {
-      Person p = new Person(i, Person.TRUST_POLICY_MAX_FRIENDS, this);
+      Person p = new Person(i, Person.TRUST_POLICY_SIGMOID_FRACTION_OF_FRIENDS, this);
       // Place the person somewhere near-ish the middle of the space.
       // Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
       //     space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
@@ -103,7 +103,7 @@ public class MessagePropagationSimulation extends SimState {
 
     }
 
-    // addRandomSocialEdges();
+    addRandomSocialEdges();
 
     // schedule.scheduleRepeating(new SimpleEncounterModel());
     // schedule.scheduleOnce(new ProximityEncounterModel());

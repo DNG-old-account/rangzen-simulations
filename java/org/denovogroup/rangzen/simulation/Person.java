@@ -12,8 +12,10 @@ import sim.util.Bag;
 import java.util.PriorityQueue;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.Set;
 import java.util.Map;
+import java.util.Random;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.io.FileNotFoundException;
@@ -24,6 +26,12 @@ public class Person extends SimplePortrayal2D implements Steppable {
 
   public static final String TRUST_POLICY_FRACTION_OF_FRIENDS = "FRACTION OF FRIENDS";
   public static final String TRUST_POLICY_MAX_FRIENDS = "MAX FRIENDS";
+  public static final String TRUST_POLICY_SIGMOID_FRACTION_OF_FRIENDS = "SIGMOID FRACTION OF FRIENDS";
+  public static final int MAX_QUEUE_LENGTH = 5;
+  // privacy parameters
+  public static final double MEAN = 0.0;    // Mean of priority noise
+  public static final double VAR = 0.1;     // variance of priority noise
+  
   public int name;
   public String trustPolicy;
   
@@ -40,11 +48,23 @@ public class Person extends SimplePortrayal2D implements Steppable {
 
   /** The next location to step to. */
   private Location nextStep;
+  
 
   public Person(int name, String trustPolicy, MessagePropagationSimulation sim) {
     this.name = name;
     this.sim = sim;
     this.trustPolicy = trustPolicy;
+    
+    // initialize the message queue
+    /** Comment this for loop to simulate infinite capacity */
+    for (int i=0; i<MAX_QUEUE_LENGTH; i++) {
+      // double p = getGaussian(MEAN,VAR);
+      // p = Math.min(p,1);
+      // p = Math.max(p,0);
+      Random r = new Random();
+      double p = r.nextDouble();
+      addMessageToQueue(new Message(UUID.randomUUID().toString(), p));
+    }
   }
 
   public void step(SimState state) {
@@ -125,10 +145,20 @@ public class Person extends SimplePortrayal2D implements Steppable {
       if (!queueHasMessageWithContent(m)) {
         Message copy = m.clone();
         copy.priority = computeNewPriority(m.priority, sharedFriends.size(), getFriends().size());
-        messageQueue.add(copy);
+        addMessageToQueue(copy);
         // System.out.println(name+"/"+otherName+": "+messageQueue.peek());
       }
     }
+  }
+  
+  public void addMessageToQueue(Message m) {
+    messageQueue.add(m);
+    while (messageQueue.size() > MAX_QUEUE_LENGTH) {
+      Message popped = messageQueue.poll();
+      System.err.println("Priority of popped message: " + popped.priority);
+    }
+    Message bottom = messageQueue.peek();
+    System.err.println("Priority of next message: " + bottom.priority);
   }
 
   public double computeNewPriority(double priority, 
@@ -139,6 +169,9 @@ public class Person extends SimplePortrayal2D implements Steppable {
     }
     else if (trustPolicy == TRUST_POLICY_MAX_FRIENDS) {
       return computeNewPriority_maxFriends(priority, sharedFriends, myFriends);
+    }
+    else if (trustPolicy == TRUST_POLICY_SIGMOID_FRACTION_OF_FRIENDS) {
+      return computeNewPriority_sigmoidFractionOfFriends(priority, sharedFriends, myFriends);
     }
     else {
       return computeNewPriority_maxFriends(priority, sharedFriends, myFriends);
@@ -164,6 +197,28 @@ public class Person extends SimplePortrayal2D implements Steppable {
     }
     return priority * trustMultiplier;
   } 
+
+  public static double computeNewPriority_sigmoidFractionOfFriends(double priority,
+                                                            int sharedFriends,
+                                                            int myFriends) {
+    double trustMultiplier = sigmoid(sharedFriends / (double) myFriends, 0.3, 13.0);
+    // add noise
+    trustMultiplier = trustMultiplier + getGaussian(MEAN,VAR);
+    
+    // truncate range
+    trustMultiplier = Math.min(trustMultiplier,1);
+    trustMultiplier = Math.max(trustMultiplier,0);
+    
+    if (sharedFriends == 0) {
+          trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
+    }
+    return priority * trustMultiplier;
+  }
+
+  public static double sigmoid(double input, double cutoff, double rate) {
+    return 1.0/(1+Math.pow(Math.E,-rate*(input-cutoff)));
+  }
+
 
   public void encounter(Person other) {
     Integer count = encounterCounts.get(other);
@@ -232,6 +287,11 @@ public class Person extends SimplePortrayal2D implements Steppable {
 
   public String toString() {
     return "" + name;
+  }
+  
+  private static double getGaussian(double mean, double variance){
+    Random fRandom = new Random();
+    return mean + fRandom.nextGaussian() * Math.sqrt(variance);
   }
 
   protected Color noMessageColor = new Color(0,0,0);
