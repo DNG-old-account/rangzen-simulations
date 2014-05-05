@@ -31,6 +31,8 @@ public class StAndrewsSocialNetworkParser implements Serializable {
 
   public static final String TRUST_POLICY = 
           Person.TRUST_POLICY_SIGMOID_FRACTION_OF_FRIENDS;
+  public static final int NUM_ROWS_TO_SKIP = 1;
+  public static final char QUOTE_CHAR = '"';
 
   public StAndrewsSocialNetworkParser(Network network, MessagePropagationSimulation sim) {
     this.network = network;
@@ -48,12 +50,15 @@ public class StAndrewsSocialNetworkParser implements Serializable {
     System.err.println("Parsing " + filename);
     char DELIMITER = ',';
     CSVReader reader;
-    reader = new CSVReader(new FileReader(filename), DELIMITER);
+    reader = new CSVReader(new FileReader(filename), 
+                           DELIMITER, 
+                           QUOTE_CHAR,
+                           NUM_ROWS_TO_SKIP);
     String [] nextLine;
     try {
       while ((nextLine = reader.readNext()) != null) {
-        int id1 = Integer.parseInt(nextLine[INDEX_ID1]);
-        int id2 = Integer.parseInt(nextLine[INDEX_ID2]);
+        int id1 = Integer.parseInt(nextLine[INDEX_ID1].trim());
+        int id2 = Integer.parseInt(nextLine[INDEX_ID2].trim());
 
         Person p1;
         Person p2;
@@ -76,5 +81,9 @@ public class StAndrewsSocialNetworkParser implements Serializable {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+  }
+  public Network getNetwork() {
+    return network;
   }
 }
