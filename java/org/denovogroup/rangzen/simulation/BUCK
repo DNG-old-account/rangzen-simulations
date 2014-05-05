@@ -3,7 +3,7 @@ java_library(
   srcs = [ 'Message.java', 'Person.java', 'Location.java', 'MobilityTrace.java',
            'MessagePropagationSimulation.java', 'MessagePropagationSimulationWithGUI.java',
            'ProximityEncounterModel.java', 'SimpleEncounterModel.java', 
-           'SingleMessageTrackingMeasurer.java', ],
+           'SingleMessageTrackingMeasurer.java', 'StAndrewsSocialNetworkParser.java', ],
   visibility = [ 'PUBLIC' ],
   deps = [
     '//libs:jcoord',
