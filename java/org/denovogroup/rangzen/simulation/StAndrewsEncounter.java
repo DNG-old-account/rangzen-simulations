@@ -37,7 +37,6 @@ public class StAndrewsEncounter implements Steppable {
   }
 
   public void step(SimState state) {
-    System.err.println(String.format("encounter between %s and %s", p1, p2));
     p1.encounter(p2);
     p2.encounter(p1);
   }

@@ -20,6 +20,11 @@ public class SingleMessageTrackingMeasurer implements Steppable {
   private MessagePropagationSimulation sim;
   private Message trackedMessage;
 
+  private static final double SECONDS_PER_MINUTE = 60.0;
+  private static final double MINUTES_PER_HOUR = 60.0;
+  private static final double HOURS_PER_DAY = 24.0;
+
+
   private int maxPropagationSeen = 0;
   private double maxTimeSeen = 0;
   private double minTimeSeen = Double.MAX_VALUE;
@@ -89,6 +94,10 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     public double NEIGHBORHOOD_RADIUS;
     public double ENCOUNTER_CHANCE;
     public double priority;
+    public double duration;
+    public double minutesDuration;
+    public double hoursDuration;
+    public double daysDuration;
   }
   public String getMeasurementsAsJSON() {
     OutputData o = new OutputData();
@@ -98,6 +107,10 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     o.NEIGHBORHOOD_RADIUS = ProximityEncounterModel.NEIGHBORHOOD_RADIUS;
     o.ENCOUNTER_CHANCE = ProximityEncounterModel.ENCOUNTER_CHANCE;
     o.NUMBER_OF_PEOPLE = MessagePropagationSimulation.NUMBER_OF_PEOPLE;
+    o.duration = maxTimeSeen - minTimeSeen;
+    o.minutesDuration = o.duration/SECONDS_PER_MINUTE;
+    o.hoursDuration = o.minutesDuration/MINUTES_PER_HOUR;
+    o.daysDuration = o.hoursDuration/HOURS_PER_DAY;
     o.priority = 1;
 
     Gson gson = new GsonBuilder().create();
