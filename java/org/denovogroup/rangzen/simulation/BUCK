@@ -4,7 +4,9 @@ java_library(
            'MessagePropagationSimulation.java', 
            'ProximitySimulationWithGUI.java',
            'ProximityEncounterModel.java', 'SimpleEncounterModel.java', 
-           'ProximitySimulation.java', 
+           'StAndrewsEncounterModel.java',
+           'StAndrewsEncounter.java',
+           'ProximitySimulation.java', 'StAndrewsSimulation.java',
            'SingleMessageTrackingMeasurer.java', 'StAndrewsSocialNetworkParser.java', ],
   visibility = [ 'PUBLIC' ],
   deps = [

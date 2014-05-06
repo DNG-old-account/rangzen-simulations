@@ -12,3 +12,10 @@ java_binary(
   ],
   main_class = 'org.denovogroup.rangzen.simulation.ProximitySimulationWithGUI',
 )
+java_binary(
+  name = 'stAndrewsSimulationNoGUI',
+  deps = [
+    '//java/org/denovogroup/rangzen/simulation:simulation',
+  ],
+  main_class = 'org.denovogroup.rangzen.simulation.StAndrewsSimulation',
+)

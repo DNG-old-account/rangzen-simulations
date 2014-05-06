@@ -154,10 +154,10 @@ public class Person extends SimplePortrayal2D implements Steppable {
     messageQueue.add(m);
     while (messageQueue.size() > MAX_QUEUE_LENGTH) {
       Message popped = messageQueue.poll();
-      System.err.println("Priority of popped message: " + popped.priority);
+      // System.err.println("Priority of popped message: " + popped.priority);
     }
     Message bottom = messageQueue.peek();
-    System.err.println("Priority of next message: " + bottom.priority);
+    // System.err.println("Priority of next message: " + bottom.priority);
   }
 
   public double computeNewPriority(double priority, 
