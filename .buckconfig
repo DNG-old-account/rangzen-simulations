@@ -1,5 +1,6 @@
 [alias]
     simulation = //apps/simulation:simulation
+    proximitySimulation = //apps/simulation:proximitySimulation
     simulationNoGUI = //apps/simulation:simulationNoGUI
 [java]
     src_roots = /java/

@@ -14,7 +14,7 @@ public class ProximityEncounterModel implements Steppable {
   public static final double ENCOUNTER_CHANCE = 0.05;
 
   public void step(SimState state) {
-    MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
+    ProximitySimulation sim = (ProximitySimulation) state;
 
     Bag people = sim.socialNetwork.getAllNodes();
     for (Object p1 : people) {

@@ -95,5 +95,9 @@ public class StAndrewsSocialNetworkParserTest {
     }
   }
 
+  @Test
+  public void testNetworkContainsCorrectEdges() {
+     
+  }
 
 }

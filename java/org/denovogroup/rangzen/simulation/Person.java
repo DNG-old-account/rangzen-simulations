@@ -68,24 +68,23 @@ public class Person extends SimplePortrayal2D implements Steppable {
   }
 
   public void step(SimState state) {
-    MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
+    // MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
     // takeRandomStep(sim);
     takeMobilityTraceStep();
-
-    // TODO(lerner): Author message with some probability.
   }
 
   public void schedule() {
     for (Location location : mobilityTrace) {
       long time = location.date.getTime();
       // sim.schedule.scheduleOnce(time, meAndMeasurer);
-      sim.schedulePerson(this, time);
+      ((ProximitySimulation) sim).schedulePerson(this, time);
     }
   }
     
   private void takeMobilityTraceStep() {
+    ProximitySimulation proxSim = (ProximitySimulation) sim;
     if (nextStep != null) {
-      sim.setObjectLatLonLocation(this, nextStep); 
+      proxSim.setObjectLatLonLocation(this, nextStep); 
       nextStepIndex++;
       if (nextStepIndex < mobilityTrace.locations.size()) {
         // nextStep = mobilityIterator.next();

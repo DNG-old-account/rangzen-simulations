@@ -1,8 +1,10 @@
 java_library(
   name = 'simulation',
   srcs = [ 'Message.java', 'Person.java', 'Location.java', 'MobilityTrace.java',
-           'MessagePropagationSimulation.java', 'MessagePropagationSimulationWithGUI.java',
+           'MessagePropagationSimulation.java', 
+           'ProximitySimulationWithGUI.java',
            'ProximityEncounterModel.java', 'SimpleEncounterModel.java', 
+           'ProximitySimulation.java', 
            'SingleMessageTrackingMeasurer.java', 'StAndrewsSocialNetworkParser.java', ],
   visibility = [ 'PUBLIC' ],
   deps = [

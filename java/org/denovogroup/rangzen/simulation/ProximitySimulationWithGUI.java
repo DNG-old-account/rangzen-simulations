@@ -15,22 +15,22 @@ import sim.util.gui.SimpleColorMap;
 import java.awt.*;
 import javax.swing.*;
 
-public class MessagePropagationSimulationWithGUI extends GUIState {
+public class ProximitySimulationWithGUI extends GUIState {
     public Display2D display;
     public JFrame displayFrame;
     private ContinuousPortrayal2D spacePortrayal = new ContinuousPortrayal2D();
     private NetworkPortrayal2D socialPortrayal = new NetworkPortrayal2D();
 
-    public MessagePropagationSimulationWithGUI() { 
-      super(new MessagePropagationSimulation(System.currentTimeMillis()));
+    public ProximitySimulationWithGUI() { 
+      super(new ProximitySimulation(System.currentTimeMillis()));
     }
     
-    public MessagePropagationSimulationWithGUI(SimState state) { 
+    public ProximitySimulationWithGUI(SimState state) { 
       super(state);
      }
 
     public void setupPortrayals() {
-      MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
+      ProximitySimulation sim = (ProximitySimulation) state;
 
       // Display the mobility of the people.
       spacePortrayal.setField(sim.space);
@@ -58,29 +58,28 @@ public class MessagePropagationSimulationWithGUI extends GUIState {
     public void init(Controller c) {
       super.init(c);
 
-      // MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
-      // display = new Display2D(sim.width, sim.height, this);
-      // display.setClipping(false);
-      // displayFrame = display.createFrame();
-      // c.registerFrame(displayFrame);   // register the frame so it appears in the "Display" list
-      // displayFrame.setVisible(true);
-      // display.attach(socialPortrayal, "Social");
-      // display.attach(spacePortrayal, "Space");  // attach the portrayals
+      ProximitySimulation sim = (ProximitySimulation) state;
+      display = new Display2D(sim.width, sim.height, this);
+      display.setClipping(false);
+      displayFrame = display.createFrame();
+      c.registerFrame(displayFrame);   // register the frame so it appears in the "Display" list
+      displayFrame.setVisible(true);
+      display.attach(socialPortrayal, "Social");
+      display.attach(spacePortrayal, "Space");  // attach the portrayals
     }
 
     public static void main(String[] args) {
-      // new MessagePropagationSimulationWithGUI().createController();
-      // MessagePropagationSimulationWithGUI mpsGUI = new MessagePropagationSimulationWithGUI();
-      // Console c = new Console(mpsGUI);
-      // c.setVisible(true);
+      ProximitySimulationWithGUI proxSimGUI = new ProximitySimulationWithGUI();
+      Console c = new Console(proxSimGUI);
+      c.setVisible(true);
     }
 
     public static String getName() { 
-      return "Message Propagation Simulation"; 
+      return "Proximity Message Propagation Simulator"; 
     }
     
     public static Object getInfo() {
-      return "Simulation of Message Propagation in Rangzen."; 
+      return "Simulation of Message Propagation in Rangzen (w/Proximity)."; 
     }
 
 
