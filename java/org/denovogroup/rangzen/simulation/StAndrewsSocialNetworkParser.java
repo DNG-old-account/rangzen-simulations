@@ -47,7 +47,7 @@ public class StAndrewsSocialNetworkParser implements Serializable {
   }
 
   private void parseNetworkFile(String filename) throws FileNotFoundException {
-    System.err.println("Parsing " + filename);
+    System.err.println("Parsing St. Andrews Social Network File: " + filename);
     char DELIMITER = ',';
     CSVReader reader;
     reader = new CSVReader(new FileReader(filename), 

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 public class StAndrewsEncounterModel implements Serializable {
   private static final long serialVersionUID = 1;
@@ -31,7 +33,7 @@ public class StAndrewsEncounterModel implements Serializable {
   private static final int INDEX_RSSI_VALUE = 5; 
   private static final int INDEX_ERROR_VALUE = 6; 
 
-  private Map<Double, Steppable> encounters = new HashMap<Double, Steppable>();
+  private Set<StAndrewsEncounter> encounters = new HashSet<StAndrewsEncounter>();
   private StAndrewsSimulation sim;
 
   public StAndrewsEncounterModel(String encounterDataFilename, 
@@ -42,6 +44,7 @@ public class StAndrewsEncounterModel implements Serializable {
   }
 
   private void loadEncounterData(String filename) throws FileNotFoundException {
+    System.err.println("Parsing St. Andrews Encounter Data File: " + filename);
     CSVReader reader;
     reader = new CSVReader(new FileReader(filename), 
                            DELIMITER, 
@@ -76,13 +79,10 @@ public class StAndrewsEncounterModel implements Serializable {
           }
         }
         if (p1 != null && p2 != null) {
-          encounters.put(startTime, new StAndrewsEncounter(p1, p2));
-          System.err.println(
-              String.format("Created encounter between %d and %d at time %f",
-                            p1.name,
-                            p2.name,
-                            startTime)
-              );
+          double duration = endTime - startTime;
+          encounters.add(new StAndrewsEncounter(p1, p2, 
+                                                startTime, endTime,
+                                                rssiValue));
         } else {
           throw new NullPointerException("Can't instantiate encounter with null person");
         }
@@ -92,8 +92,8 @@ public class StAndrewsEncounterModel implements Serializable {
     }
   }
 
-  public Map<Double, Steppable> getSchedule() {
-    return new HashMap<Double, Steppable>();
+  public Set<StAndrewsEncounter> getEncounters() {
+    return encounters;
   }
 
   private void encounter(Person p1, Person p2) {

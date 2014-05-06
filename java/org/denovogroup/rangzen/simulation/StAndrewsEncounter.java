@@ -17,15 +17,27 @@ import java.util.Map;
 public class StAndrewsEncounter implements Steppable {
   private static final long serialVersionUID = 1;
 
-  private Person p1;
-  private Person p2;
+  public Person p1;
+  public Person p2;
+  public double startTime;
+  public double endTime;
+  public double duration;
+  public double rssi;
   
-  public StAndrewsEncounter(Person p1, Person p2) {
+  public StAndrewsEncounter(Person p1, Person p2, 
+                            double startTime, double endTime,
+                            double rssi) {
     this.p1 = p1;
     this.p2 = p2;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.rssi = rssi;
+
+    this.duration = endTime - startTime;
   }
 
   public void step(SimState state) {
+    System.err.println(String.format("encounter between %s and %s", p1, p2));
     p1.encounter(p2);
     p2.encounter(p1);
   }

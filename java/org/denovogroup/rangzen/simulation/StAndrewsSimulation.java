@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 public class StAndrewsSimulation extends MessagePropagationSimulation {
   private static final long serialVersionUID = 1;
@@ -52,7 +54,15 @@ public class StAndrewsSimulation extends MessagePropagationSimulation {
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
-    // ((StAndrewsEncounterModel) encounterModel).schedule();
+    Set<StAndrewsEncounter> encounters =
+            ((StAndrewsEncounterModel) saEncounterModel).getEncounters();
+    for (StAndrewsEncounter encounter : encounters) {
+      Steppable[] encounterAndMeasurer = new Steppable[2];
+      encounterAndMeasurer[0] = encounter;
+      encounterAndMeasurer[1] = measurer;
+      Sequence s = new Sequence(encounterAndMeasurer);
+      schedule.scheduleOnce(encounter.startTime, s);
+    }
 
     schedule.scheduleOnce(measurer);     
   }
