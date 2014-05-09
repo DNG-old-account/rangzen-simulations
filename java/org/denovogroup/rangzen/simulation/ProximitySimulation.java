@@ -44,10 +44,14 @@ public class ProximitySimulation extends MessagePropagationSimulation {
 
   public static final char QUOTE_CHAR = '"';
   
+  // public static final String GOWALLA_SOCIAL_NETWORK_FILE = 
+  //         "data/gowalla/loc-gowalla_edges.txt";
+  // public static final String GOWALLA_MOBILITY_TRACE_FILE = 
+  //         "data/gowalla/loc-gowalla_totalCheckins.txt";
   public static final String GOWALLA_SOCIAL_NETWORK_FILE = 
-          "data/gowalla/loc-gowalla_edges.txt";
+          "data/gowalla/firstHundredEdges.txt";
   public static final String GOWALLA_MOBILITY_TRACE_FILE = 
-          "data/gowalla/loc-gowalla_totalCheckins.txt";
+          "data/gowalla/firstHundredCheckins.txt";
   public static final int GOWALLA_MIN_PERSON_ID = 0;
   public static final char GOWALLA_DELIMITER = '\t';
   public static final int GOWALLA_INDEX_PERSON_ID = 0;
@@ -77,6 +81,8 @@ public class ProximitySimulation extends MessagePropagationSimulation {
 
     // addCabspottingPeopleAndRandomSocialNetwork(); 
     addGowallaPeopleAndSocialNetwork();
+
+    System.err.println("Start() complete. All input files parsed.");
     
   }
 
@@ -101,6 +107,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
 
     // Parse the trace and add the traces to the people.
     try {
+      System.err.println("Parsing trace file " + GOWALLA_MOBILITY_TRACE_FILE);
       CSVFieldChunkReader chunkReader = 
         new CSVFieldChunkReader(GOWALLA_MOBILITY_TRACE_FILE,
                                 GOWALLA_DELIMITER,
@@ -108,7 +115,12 @@ public class ProximitySimulation extends MessagePropagationSimulation {
                                 GOWALLA_LINES_TO_SKIP,
                                 GOWALLA_INDEX_PERSON_ID);
       List<String[]> chunk;
+      int i = 0;
       while ((chunk = chunkReader.nextChunk()) != null) {
+        i++;
+        if (i % 10000 == 0) {
+          System.err.print(i + ", ");
+        }
         // System.out.println("Reading chunk for person " + 
         //                    Integer.parseInt(chunk.get(0)[GOWALLA_INDEX_PERSON_ID]));
         List<Location> locations = new ArrayList<Location>();
@@ -131,9 +143,10 @@ public class ProximitySimulation extends MessagePropagationSimulation {
             System.exit(1);
           }
           person.addMobilityTrace(trace);
-          System.err.println(chunk.size() + " check-ins for person with ID " + id);
+          person.schedule();
+          // System.err.println(chunk.size() + " check-ins for person with ID " + id);
         } else {
-          System.err.println("No check-ins for person with ID ??");
+          System.err.println("This shouldn't happen! ASDF");
         }
           
       }
@@ -243,7 +256,8 @@ public class ProximitySimulation extends MessagePropagationSimulation {
       //
       // 2010-05-27T22:39:52Z
       //
-      SimpleDateFormat gowallaFormat = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss'Z'");
+      SimpleDateFormat gowallaFormat =
+              new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss'Z'");
       return gowallaFormat.parse(dateString);
     } catch (ParseException e) {
       System.err.format("Can't parse date string: '%s'\n", dateString);

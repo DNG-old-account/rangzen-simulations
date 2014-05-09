@@ -19,12 +19,14 @@ public class ProximityEncounterModel implements Steppable {
     Bag people = sim.socialNetwork.getAllNodes();
     for (Object p1 : people) {
       Double2D location = sim.space.getObjectLocation(p1);
-      Bag neighborhood = 
-            sim.space.getNeighborsExactlyWithinDistance(location, 
-                                                        NEIGHBORHOOD_RADIUS);
-      for (Object p2 : neighborhood) {
-        if (sim.random.nextDouble() < ENCOUNTER_CHANCE && p1 != p2) {
-          ((Person) p1).encounter((Person) p2);
+      if (location != null) {
+        Bag neighborhood = 
+          sim.space.getNeighborsExactlyWithinDistance(location, 
+              NEIGHBORHOOD_RADIUS);
+        for (Object p2 : neighborhood) {
+          if (sim.random.nextDouble() < ENCOUNTER_CHANCE && p1 != p2) {
+            ((Person) p1).encounter((Person) p2);
+          }
         }
       }
     }

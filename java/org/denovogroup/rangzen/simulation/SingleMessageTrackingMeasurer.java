@@ -20,6 +20,7 @@ public class SingleMessageTrackingMeasurer implements Steppable {
   private MessagePropagationSimulation sim;
   private Message trackedMessage;
 
+  private static final double MILLISECONDS_PER_SECOND = 1000.0;
   private static final double SECONDS_PER_MINUTE = 60.0;
   private static final double MINUTES_PER_HOUR = 60.0;
   private static final double HOURS_PER_DAY = 24.0;
@@ -107,10 +108,18 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     o.NEIGHBORHOOD_RADIUS = ProximityEncounterModel.NEIGHBORHOOD_RADIUS;
     o.ENCOUNTER_CHANCE = ProximityEncounterModel.ENCOUNTER_CHANCE;
     o.NUMBER_OF_PEOPLE = MessagePropagationSimulation.NUMBER_OF_PEOPLE;
-    o.duration = maxTimeSeen - minTimeSeen;
-    o.minutesDuration = o.duration/SECONDS_PER_MINUTE;
-    o.hoursDuration = o.minutesDuration/MINUTES_PER_HOUR;
-    o.daysDuration = o.hoursDuration/HOURS_PER_DAY;
+    // Guessing that the time is in milliseconds instead of seconds
+    if (maxTimeSeen > 1399679023 * 100) {
+      o.duration = (maxTimeSeen - minTimeSeen) / MILLISECONDS_PER_SECOND;
+      o.minutesDuration = o.duration/SECONDS_PER_MINUTE;
+      o.hoursDuration = o.minutesDuration/MINUTES_PER_HOUR;
+      o.daysDuration = o.hoursDuration/HOURS_PER_DAY;
+    } else {
+      o.duration = maxTimeSeen - minTimeSeen;
+      o.minutesDuration = o.duration/SECONDS_PER_MINUTE;
+      o.hoursDuration = o.minutesDuration/MINUTES_PER_HOUR;
+      o.daysDuration = o.hoursDuration/HOURS_PER_DAY;
+    }
     o.priority = 1;
 
     Gson gson = new GsonBuilder().create();

@@ -99,6 +99,7 @@ public class StAndrewsSocialNetworkParser implements Serializable {
         }
         network.addEdge(p1, p2, new Double(1.0));
       }
+      System.err.println();
     } catch (IOException e) {
       e.printStackTrace();
     }
