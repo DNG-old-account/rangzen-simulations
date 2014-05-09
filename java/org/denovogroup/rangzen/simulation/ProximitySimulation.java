@@ -44,14 +44,14 @@ public class ProximitySimulation extends MessagePropagationSimulation {
 
   public static final char QUOTE_CHAR = '"';
   
-  // public static final String GOWALLA_SOCIAL_NETWORK_FILE = 
-  //         "data/gowalla/loc-gowalla_edges.txt";
-  // public static final String GOWALLA_MOBILITY_TRACE_FILE = 
-  //         "data/gowalla/loc-gowalla_totalCheckins.txt";
   public static final String GOWALLA_SOCIAL_NETWORK_FILE = 
-          "data/gowalla/firstHundredEdges.txt";
+          "data/gowalla/loc-gowalla_edges.txt";
   public static final String GOWALLA_MOBILITY_TRACE_FILE = 
-          "data/gowalla/firstHundredCheckins.txt";
+          "data/gowalla/loc-gowalla_totalCheckins.txt";
+  // public static final String GOWALLA_SOCIAL_NETWORK_FILE = 
+  //         "data/gowalla/firstHundredEdges.txt";
+  // public static final String GOWALLA_MOBILITY_TRACE_FILE = 
+  //         "data/gowalla/firstHundredCheckins.txt";
   public static final int GOWALLA_MIN_PERSON_ID = 0;
   public static final char GOWALLA_DELIMITER = '\t';
   public static final int GOWALLA_INDEX_PERSON_ID = 0;
