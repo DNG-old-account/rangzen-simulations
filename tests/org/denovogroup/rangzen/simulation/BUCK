@@ -62,3 +62,17 @@ java_test(
     '//libs:mason',
   ],
 )
+
+java_test(
+  name = 'PeekableAndChunkReaderTests',
+  srcs = ['PeekableAndChunkReaderTests.java'],
+  visibility = [ 'PUBLIC' ],
+  deps = [
+    '//libs:jcoord',
+    '//libs:junit-4.11',
+    '//libs:hamcrest-core-1.3',
+    '//java/org/denovogroup/rangzen/simulation:simulation',
+    '//libs:mason',
+    '//libs:opencsv',
+  ],
+)
