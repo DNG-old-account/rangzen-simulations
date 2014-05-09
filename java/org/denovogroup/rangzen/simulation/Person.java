@@ -283,6 +283,10 @@ public class Person extends SimplePortrayal2D implements Steppable {
       nextStepIndex++;
     }
   }
+  
+  public void addMobilityTrace(MobilityTrace mobilityTrace) {
+    this.mobilityTrace = mobilityTrace;
+  }
 
   public String toString() {
     return "" + name;

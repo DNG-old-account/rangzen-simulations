@@ -24,6 +24,8 @@ public class StAndrewsSocialNetworkParser implements Serializable {
   private Map<Integer, Person> people = new HashMap<Integer, Person>();
   private Network network = new Network(UNDIRECTED);
   private MessagePropagationSimulation sim;
+  private char delimiter;
+  private int rowsToSkip;
 
   public static final boolean UNDIRECTED = false;
   public static final int INDEX_ID1 = 0;
@@ -31,32 +33,51 @@ public class StAndrewsSocialNetworkParser implements Serializable {
 
   public static final String TRUST_POLICY = 
           Person.TRUST_POLICY_SIGMOID_FRACTION_OF_FRIENDS;
-  public static final int NUM_ROWS_TO_SKIP = 1;
+  public static final int DEFAULT_ROWS_TO_SKIP = 1;
   public static final char QUOTE_CHAR = '"';
+  public static final char DEFAULT_DELIMITER = ',';
+  
 
-  public StAndrewsSocialNetworkParser(Network network, MessagePropagationSimulation sim) {
+  public StAndrewsSocialNetworkParser(Network network, 
+                                      MessagePropagationSimulation sim) {
     this.network = network;
     this.sim = sim;
   }
   
   public StAndrewsSocialNetworkParser(String filename, 
+                                      char delimiter,
+                                      int rowsToSkip,
                                       MessagePropagationSimulation sim) 
                                   throws FileNotFoundException {
     this.sim = sim;
+    this.delimiter = delimiter;
+    this.rowsToSkip = rowsToSkip;
+    parseNetworkFile(filename);
+  }
+  public StAndrewsSocialNetworkParser(String filename, 
+                                      MessagePropagationSimulation sim) 
+                                  throws FileNotFoundException {
+    this.sim = sim;
+    this.delimiter = DEFAULT_DELIMITER;
+    this.rowsToSkip = DEFAULT_ROWS_TO_SKIP;
     parseNetworkFile(filename);
   }
 
   private void parseNetworkFile(String filename) throws FileNotFoundException {
-    System.err.println("Parsing St. Andrews Social Network File: " + filename);
-    char DELIMITER = ',';
+    System.err.println("Parsing Social Network File: " + filename);
     CSVReader reader;
     reader = new CSVReader(new FileReader(filename), 
-                           DELIMITER, 
+                           delimiter, 
                            QUOTE_CHAR,
-                           NUM_ROWS_TO_SKIP);
+                           rowsToSkip);
     String [] nextLine;
+    int line = 0;
     try {
       while ((nextLine = reader.readNext()) != null) {
+        line++;
+        if (line % 100000 == 0) {
+          System.err.print(line + ", ");
+        }        
         int id1 = Integer.parseInt(nextLine[INDEX_ID1].trim());
         int id2 = Integer.parseInt(nextLine[INDEX_ID2].trim());
 
