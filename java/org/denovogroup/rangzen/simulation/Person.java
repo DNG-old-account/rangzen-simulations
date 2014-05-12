@@ -27,10 +27,16 @@ public class Person extends SimplePortrayal2D implements Steppable {
   public static final String TRUST_POLICY_FRACTION_OF_FRIENDS = "FRACTION OF FRIENDS";
   public static final String TRUST_POLICY_MAX_FRIENDS = "MAX FRIENDS";
   public static final String TRUST_POLICY_SIGMOID_FRACTION_OF_FRIENDS = "SIGMOID FRACTION OF FRIENDS";
+  public static final String TRUST_POLICY_ADVERSARY = "TRUST ONLY OTHER ADVERSARIES";
+  
+  // simulation parameters
   public static final int MAX_QUEUE_LENGTH = 5;
+  public static final boolean checkJamming = true;
+  
   // privacy parameters
   public static final double MEAN = 0.0;    // Mean of priority noise
   public static final double VAR = 0.1;     // variance of priority noise
+  
   
   public int name;
   public String trustPolicy;
@@ -57,14 +63,13 @@ public class Person extends SimplePortrayal2D implements Steppable {
     
     // initialize the message queue
     /** Comment this for loop to simulate infinite capacity */
-    for (int i=0; i<MAX_QUEUE_LENGTH; i++) {
-      // double p = getGaussian(MEAN,VAR);
-      // p = Math.min(p,1);
-      // p = Math.max(p,0);
-      Random r = new Random();
-      double p = r.nextDouble();
-      addMessageToQueue(new Message(UUID.randomUUID().toString(), p));
-    }
+    // for (int i=0; i<MAX_QUEUE_LENGTH; i++) {
+      // // double p = getGaussian(MEAN,VAR);
+      // // p = Math.min(p,1);
+      // // p = Math.max(p,0);
+      // double p = sim.random.nextDouble();
+      // addMessageToQueue(new Message(UUID.randomUUID().toString(), p));
+    // }
   }
 
   public void step(SimState state) {
@@ -172,6 +177,9 @@ public class Person extends SimplePortrayal2D implements Steppable {
     else if (trustPolicy == TRUST_POLICY_SIGMOID_FRACTION_OF_FRIENDS) {
       return computeNewPriority_sigmoidFractionOfFriends(priority, sharedFriends, myFriends);
     }
+    else if (trustPolicy == TRUST_POLICY_ADVERSARY) {
+      return computeNewPriority_adversary(priority, sharedFriends, myFriends);
+    }
     else {
       return computeNewPriority_maxFriends(priority, sharedFriends, myFriends);
     }
@@ -216,6 +224,13 @@ public class Person extends SimplePortrayal2D implements Steppable {
 
   public static double sigmoid(double input, double cutoff, double rate) {
     return 1.0/(1+Math.pow(Math.E,-rate*(input-cutoff)));
+  }
+  
+  public static double computeNewPriority_adversary(double priority,
+                                                            int sharedFriends,
+                                                            int myFriends) {
+    // the adversary trusts nobody's messages but his own
+    return 0.0;
   }
 
 
