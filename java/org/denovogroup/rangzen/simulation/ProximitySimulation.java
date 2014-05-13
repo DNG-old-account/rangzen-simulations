@@ -42,8 +42,8 @@ public class ProximitySimulation extends MessagePropagationSimulation {
           ProximityEncounterModel.NEIGHBORHOOD_RADIUS * 2;
    
   // Test jamming?
-  public static final int NUMBER_OF_ADVERSARIES = 5;
-  public static final boolean mobileJamming = true;
+  public static final int NUMBER_OF_ADVERSARIES = 0;
+  public static final boolean mobileJamming = false;
   public static final boolean staticJamming = false;
   public static final boolean staticJammingOptimal = false;
   public static final int NUMBER_OF_STATIC_JAMMERS = 5;
@@ -71,7 +71,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static final int GOWALLA_INDEX_LOCATION_ID = 4;
   public static final int GOWALLA_LINES_TO_SKIP = 1;
 
-  private String traceIndexFilename = CABSPOTTING_MOBILITY_TRACE_INDEX_FILE;
+  private String traceIndexFilename = CABSPOTTING_MOBILITY_TRACE_INDEX_FILE; //GOWALLA_MOBILITY_TRACE_FILE; //CABSPOTTING_MOBILITY_TRACE_INDEX_FILE;
 
   /** The agent which measures the simulation and reports statistics on it. */
   public Steppable measurer = new SingleMessageTrackingMeasurer(this);
@@ -91,8 +91,8 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     schedule.scheduleOnce(measurer);     
 
     // addCabspottingPeopleAndRandomSocialNetwork(); 
-    // addGowallaPeopleAndSocialNetwork();
-    addSybilAndJammingStuff();
+    addGowallaPeopleAndSocialNetwork();
+    // addSybilAndJammingStuff();
     
 
     System.err.println("Start() complete. All input files parsed.");
@@ -281,6 +281,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
             System.exit(1);
           }
           person.addMobilityTrace(trace);
+          // System.err.println("trace has this many entries "+trace.locations.size());
           person.schedule();
           // System.err.println(chunk.size() + " check-ins for person with ID " + id);
         } else {
