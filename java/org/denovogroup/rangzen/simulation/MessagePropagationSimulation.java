@@ -33,7 +33,7 @@ public abstract class MessagePropagationSimulation extends SimState {
   public static final double EPSILON_TRUST = 4.001;
   public static final int MAX_FRIENDS = 40;
   public static final int NUMBER_OF_PEOPLE = 400;
-  public static final double MAX_RUNTIME = 150.0; // in hours
+  public static final double MAX_RUNTIME = -1; // in hours
   public static final double randomMultiplier = 0.5;
     
   /** Physical space in which mobility happens. */
