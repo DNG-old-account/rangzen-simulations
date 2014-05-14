@@ -63,13 +63,13 @@ public class Person extends SimplePortrayal2D implements Steppable {
     
     // initialize the message queue
     /** Comment this for loop to simulate infinite capacity */
-    // for (int i=0; i<MAX_QUEUE_LENGTH; i++) {
-      // // double p = getGaussian(MEAN,VAR);
-      // // p = Math.min(p,1);
-      // // p = Math.max(p,0);
-      // double p = sim.random.nextDouble();
-      // addMessageToQueue(new Message(UUID.randomUUID().toString(), p));
-    // }
+    for (int i=0; i<MAX_QUEUE_LENGTH; i++) {
+      // double p = getGaussian(MEAN,VAR);
+      // p = Math.min(p,1);
+      // p = Math.max(p,0);
+      double p = sim.random.nextDouble();
+      addMessageToQueue(new Message(UUID.randomUUID().toString(), p));
+    }
   }
 
   public void step(SimState state) {

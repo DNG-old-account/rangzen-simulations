@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Arrays;
 import java.util.TreeMap;
 
+import java.lang.Math;
+
 
 public class SingleMessageTrackingMeasurer implements Steppable {
   private static final long serialVersionUID = 1;
@@ -48,8 +50,16 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     
     if (sim.schedule.getSteps() == 0) {
       /** Compose a message */
-      // authorMessage(); //Uses the first node in the network as an author
-      authorMessagePopular(false);
+      if (((ProximitySimulation)sim).messageAuthor == ProximitySimulation.POPULAR_AUTHOR) {
+        System.err.println("Message from a popular person.");
+        authorMessagePopular(((ProximitySimulation)sim).popularAuthor);//Authors a message from a popular or unpopular node
+      } else if (((ProximitySimulation)sim).messageAuthor == ProximitySimulation.ADVERSARIAL_AUTHOR) {
+        authorMessageAdversarial(); // author a message from an adversary
+        System.err.println("Message from an adversary.");
+      } else {
+        System.err.println("Message from an average person.");
+        authorMessage(); //Uses a random node in the network as an author
+      }
       // System.out.println("authored message"+sim.schedule.getSteps());
     }
 
@@ -94,6 +104,18 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     }
   }
   
+  private void authorMessageAdversarial() {
+    Bag people = sim.socialNetwork.getAllNodes();
+    // Random randomGenerator = new Random();
+    for (Object p : people) {
+        Person person = (Person) p;
+        if (person.trustPolicy == Person.TRUST_POLICY_ADVERSARY) { 
+            person.addMessageToQueue(trackedMessage);
+            return;
+        }      
+    }
+  }
+  
   private void authorMessagePopular(boolean popularFlag) {
     // if popularFlag == true, start the message from a popular node
     // else, start it from an unpopular node
@@ -110,9 +132,11 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     
     //Choose an (un)popular node at random among the (bottom) top 'boundary' degrees
     author = sim.random.nextInt(boundary);
-    author = 1; // either 2 or 48
+    author = 2; // either 2 or 48
     if (popularFlag) {
         author = people.numObjs - author;
+    } else { 
+        author = Math.max(author,((ProximitySimulation)sim).NUMBER_OF_ADVERSARIES);
     }
     int authorIdx = indices.get(author);
 

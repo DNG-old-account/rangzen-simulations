@@ -41,11 +41,19 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static final double discretization = 
           ProximityEncounterModel.NEIGHBORHOOD_RADIUS * 2;
    
-  // Test jamming?
+  // Adversary tests
+  public static final String RANDOM_AUTHOR = "Random author";
+  public static final String ADVERSARIAL_AUTHOR = "Adversarial author";
+  public static final String POPULAR_AUTHOR = "(Un)popular author";
+  
   public static final int NUMBER_OF_ADVERSARIES = 5;
-  public static final boolean mobileJamming = true;
+  public static String messageAuthor = RANDOM_AUTHOR;
+  public static boolean popularAuthor = false;
+  
+  public static final boolean mobileJamming = false;
   public static final boolean staticJamming = false;
   public static final boolean staticJammingOptimal = false;
+  
   public static final int NUMBER_OF_STATIC_JAMMERS = 5;
   public static final double JAMMING_RADIUS = 5000.0; // meters
 
@@ -71,7 +79,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static final int GOWALLA_INDEX_LOCATION_ID = 4;
   public static final int GOWALLA_LINES_TO_SKIP = 1;
 
-  private String traceIndexFilename = CABSPOTTING_MOBILITY_TRACE_INDEX_FILE;
+  private String traceIndexFilename = CABSPOTTING_MOBILITY_TRACE_INDEX_FILE; //GOWALLA_MOBILITY_TRACE_FILE; //CABSPOTTING_MOBILITY_TRACE_INDEX_FILE;
 
   /** The agent which measures the simulation and reports statistics on it. */
   public Steppable measurer = new SingleMessageTrackingMeasurer(this);
@@ -90,9 +98,14 @@ public class ProximitySimulation extends MessagePropagationSimulation {
 
     schedule.scheduleOnce(measurer);     
 
-    // addCabspottingPeopleAndRandomSocialNetwork(); 
+    addCabspottingPeopleAndRandomSocialNetwork(); 
     // addGowallaPeopleAndSocialNetwork();
-    addSybilAndJammingStuff();
+    
+    // Throw in some adversaries at the lowest-degree nodes
+    createAdversaries();
+    
+    
+    // addSybilAndJammingStuff(); (NEVER CALL THIS! It recreates the network!)
     
 
     System.err.println("Start() complete. All input files parsed.");
@@ -281,6 +294,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
             System.exit(1);
           }
           person.addMobilityTrace(trace);
+          // System.err.println("trace has this many entries "+trace.locations.size());
           person.schedule();
           // System.err.println(chunk.size() + " check-ins for person with ID " + id);
         } else {
@@ -334,7 +348,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
       p.schedule();
 
     }
-    addRandomSocialEdges();
+    addScaleFreeRandomSocialGraph();
   }
 
 
@@ -528,6 +542,21 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   }
 
   public static void main(String[] args) {
+    if (args.length > 0) {
+        for (String arg : args){
+            if (arg == "-r") {
+                messageAuthor = RANDOM_AUTHOR;
+            } else if (arg == "-p") {
+                messageAuthor = POPULAR_AUTHOR;
+                popularAuthor = true;
+            } else if (arg == "-u") {
+                messageAuthor = POPULAR_AUTHOR;
+                popularAuthor = false;
+            } else if (arg == "-a") {
+                messageAuthor = ADVERSARIAL_AUTHOR;
+            }
+        }
+    }
     doLoop(ProximitySimulation.class, args);
     System.exit(0);
   }
