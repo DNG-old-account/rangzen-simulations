@@ -46,7 +46,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static final String ADVERSARIAL_AUTHOR = "Adversarial author";
   public static final String POPULAR_AUTHOR = "(Un)popular author";
   
-  public static final int NUMBER_OF_ADVERSARIES = 5;
+  public static final int NUMBER_OF_ADVERSARIES = 12;
   public static String messageAuthor = RANDOM_AUTHOR;
   public static boolean popularAuthor = false;
   
@@ -544,15 +544,16 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static void main(String[] args) {
     if (args.length > 0) {
         for (String arg : args){
-            if (arg == "-r") {
+            System.err.println(arg);
+            if (arg.equals("-r")) {
                 messageAuthor = RANDOM_AUTHOR;
-            } else if (arg == "-p") {
+            } else if (arg.equals("-p")) {
                 messageAuthor = POPULAR_AUTHOR;
                 popularAuthor = true;
-            } else if (arg == "-u") {
+            } else if (arg.equals("-u")) {
                 messageAuthor = POPULAR_AUTHOR;
                 popularAuthor = false;
-            } else if (arg == "-a") {
+            } else if (arg.equals("-a")) {
                 messageAuthor = ADVERSARIAL_AUTHOR;
             }
         }

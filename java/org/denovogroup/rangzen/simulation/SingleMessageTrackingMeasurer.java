@@ -51,7 +51,11 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     if (sim.schedule.getSteps() == 0) {
       /** Compose a message */
       if (((ProximitySimulation)sim).messageAuthor == ProximitySimulation.POPULAR_AUTHOR) {
-        System.err.println("Message from a popular person.");
+        if (((ProximitySimulation)sim).popularAuthor) {
+            System.err.println("Message from a popular person.");
+        } else {
+            System.err.println("Message from an unpopular person.");
+        }
         authorMessagePopular(((ProximitySimulation)sim).popularAuthor);//Authors a message from a popular or unpopular node
       } else if (((ProximitySimulation)sim).messageAuthor == ProximitySimulation.ADVERSARIAL_AUTHOR) {
         authorMessageAdversarial(); // author a message from an adversary
