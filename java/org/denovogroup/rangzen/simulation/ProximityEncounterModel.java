@@ -50,16 +50,17 @@ public class ProximityEncounterModel implements Steppable {
                 continue;
             }
         }
-
-        Bag neighborhood = 
+        if (location != null) {
+          Bag neighborhood = 
             sim.space.getNeighborsExactlyWithinDistance(location, 
-                                                        NEIGHBORHOOD_RADIUS);
-                        
-        for (Object p2 : neighborhood) {
+                NEIGHBORHOOD_RADIUS);
+
+          for (Object p2 : neighborhood) {
             if (sim.random.nextDouble() < ENCOUNTER_CHANCE && p1 != p2) {
               // System.err.println(((Person)p1).trustPolicy + " and " + ((Person)p2).trustPolicy);
               ((Person) p1).encounter((Person) p2);
             }
+          }
         }
     }
     // System.out.println("Done stepping encounter model");
