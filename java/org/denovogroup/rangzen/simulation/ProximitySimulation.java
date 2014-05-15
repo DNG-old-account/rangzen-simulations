@@ -78,8 +78,19 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static final int GOWALLA_INDEX_LONGITUDE = 3;
   public static final int GOWALLA_INDEX_LOCATION_ID = 4;
   public static final int GOWALLA_LINES_TO_SKIP = 1;
+  // Restrict gowalla to London
+  public static final double GOWALLA_MIN_LATITUDE = 51.1091401;
+  public static final double GOWALLA_MAX_LATITUDE = 51.6728598;
+  public static final double GOWALLA_MIN_LONGITUDE = -0.5950405999999475;
+  public static final double GOWALLA_MAX_LONGITUDE = 0.30717490000006364;
+  // Restrict gowalla to Los Angeles
+  // public static final double GOWALLA_MIN_LATITUDE = 33.7700504;
+  // public static final double GOWALLA_MAX_LATITUDE = 34.1808392;
+  // public static final double GOWALLA_MIN_LONGITUDE = -117.91450359999999;
+  // public static final double GOWALLA_MAX_LONGITUDE = -118.4911912;
+  
 
-  private String traceIndexFilename = CABSPOTTING_MOBILITY_TRACE_INDEX_FILE; //GOWALLA_MOBILITY_TRACE_FILE; //CABSPOTTING_MOBILITY_TRACE_INDEX_FILE;
+  private String traceIndexFilename = GOWALLA_MOBILITY_TRACE_FILE; //CABSPOTTING_MOBILITY_TRACE_INDEX_FILE;
 
   /** The agent which measures the simulation and reports statistics on it. */
   public Steppable measurer = new SingleMessageTrackingMeasurer(this);
@@ -98,11 +109,11 @@ public class ProximitySimulation extends MessagePropagationSimulation {
 
     schedule.scheduleOnce(measurer);     
 
-    addCabspottingPeopleAndRandomSocialNetwork(); 
-    // addGowallaPeopleAndSocialNetwork();
+    // addCabspottingPeopleAndRandomSocialNetwork(); 
+    addGowallaPeopleAndSocialNetwork();
     
     // Throw in some adversaries at the lowest-degree nodes
-    createAdversaries();
+    // createAdversaries();
     
     
     // addSybilAndJammingStuff(); (NEVER CALL THIS! It recreates the network!)
@@ -257,6 +268,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
 
     // Parse the trace and add the traces to the people.
+    boolean outOfRange; // checks if a node is in our geographic range of interest
     try {
       System.err.println("Parsing trace file " + GOWALLA_MOBILITY_TRACE_FILE);
       CSVFieldChunkReader chunkReader = 
@@ -269,6 +281,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
       int i = 0;
       while ((chunk = chunkReader.nextChunk()) != null) {
         i++;
+        outOfRange = false;
         if (i % 10000 == 0) {
           System.err.print(i + ", ");
         }
@@ -277,14 +290,21 @@ public class ProximitySimulation extends MessagePropagationSimulation {
         List<Location> locations = new ArrayList<Location>();
         for (String[] line : chunk) {
           double lat = Double.parseDouble(line[GOWALLA_INDEX_LATITUDE]);
+          if (lat < GOWALLA_MIN_LATITUDE || lat > GOWALLA_MAX_LATITUDE){
+            outOfRange = true;
+            break;
+          }
           double lon = Double.parseDouble(line[GOWALLA_INDEX_LONGITUDE]);
+          if (lon < GOWALLA_MIN_LONGITUDE || lon > GOWALLA_MAX_LONGITUDE){
+            outOfRange = true;
+            break;
+          }
           String dateString = line[GOWALLA_INDEX_DATE];
           Date date = dateStringToDate(dateString);
           Location location = new Location(lat, lon, date);
           locations.add(location);
         }
-        MobilityTrace trace = new MobilityTrace(locations);
-
+        
         int id;
         if (chunk.size() > 0) {
           id = Integer.parseInt(chunk.get(0)[GOWALLA_INDEX_PERSON_ID]);
@@ -293,6 +313,15 @@ public class ProximitySimulation extends MessagePropagationSimulation {
             System.err.println("Person with id " + id + " exists in mobility but not in social network");
             System.exit(1);
           }
+          
+          // If the node is not inside the greater London area, so we don't add it
+          // and remove it from the social network
+          if (outOfRange) {
+            socialNetwork.removeNode(person);
+            continue;
+          }
+          
+          MobilityTrace trace = new MobilityTrace(locations);
           person.addMobilityTrace(trace);
           // System.err.println("trace has this many entries "+trace.locations.size());
           person.schedule();
@@ -302,6 +331,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
         }
           
       }
+      System.err.println("The number of nodes in the network are "+ socialNetwork.getAllNodes().numObjs);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       System.exit(1);

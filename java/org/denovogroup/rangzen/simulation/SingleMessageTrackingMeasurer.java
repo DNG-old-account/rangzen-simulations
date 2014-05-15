@@ -89,7 +89,7 @@ public class SingleMessageTrackingMeasurer implements Steppable {
 
     // Stop running if the simulation has been going too long
     double hours = (time - minTimeSeen) / 1000 / 60 / 60;
-    if (seenTrackedMessageCount == MessagePropagationSimulation.NUMBER_OF_PEOPLE || hours > sim.MAX_RUNTIME ) {
+    if (seenTrackedMessageCount == MessagePropagationSimulation.NUMBER_OF_PEOPLE || (hours > sim.MAX_RUNTIME && sim.MAX_RUNTIME > 0) ) {
       sim.schedule.clear();
     }
 
