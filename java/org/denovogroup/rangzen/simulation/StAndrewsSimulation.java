@@ -38,6 +38,15 @@ public class StAndrewsSimulation extends MessagePropagationSimulation {
 
   private StAndrewsSocialNetworkParser parser;
   private StAndrewsEncounterModel saEncounterModel;
+  
+  // Adversary info!
+  public static final String RANDOM_AUTHOR = "Random author";
+  public static final String ADVERSARIAL_AUTHOR = "Adversarial author";
+  public static final String POPULAR_AUTHOR = "(Un)popular author";
+  
+  public static final int NUMBER_OF_ADVERSARIES = 0;
+  public static String messageAuthor = RANDOM_AUTHOR;
+  public static boolean popularAuthor = false;
 
   public void start() {
     super.start(); 

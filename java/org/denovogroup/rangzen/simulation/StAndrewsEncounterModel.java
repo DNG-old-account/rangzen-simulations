@@ -20,7 +20,7 @@ import java.util.HashSet;
 public class StAndrewsEncounterModel implements Serializable {
   private static final long serialVersionUID = 1;
 
-  private static final double encounterChance = 0.0035;
+  private static final double encounterChance = 0.1;
   private static final int NUM_ROWS_TO_SKIP = 1;
   private static final char QUOTE_CHAR = '"';
   private static final char DELIMITER = ',';
@@ -78,13 +78,15 @@ public class StAndrewsEncounterModel implements Serializable {
             p2 = p;
           }
         }
-        if (p1 != null && p2 != null) {
-          double duration = endTime - startTime;
-          encounters.add(new StAndrewsEncounter(p1, p2, 
-                                                startTime, endTime,
-                                                rssiValue));
-        } else {
-          throw new NullPointerException("Can't instantiate encounter with null person");
+        if (sim.random.nextDouble() < encounterChance) {
+            if (p1 != null && p2 != null) {
+              double duration = endTime - startTime;
+              encounters.add(new StAndrewsEncounter(p1, p2, 
+                                                    startTime, endTime,
+                                                    rssiValue));
+            } else {
+              throw new NullPointerException("Can't instantiate encounter with null person");
+            }
         }
       }
     } catch (IOException e) {

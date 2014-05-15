@@ -46,7 +46,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static final String ADVERSARIAL_AUTHOR = "Adversarial author";
   public static final String POPULAR_AUTHOR = "(Un)popular author";
   
-  public static final int NUMBER_OF_ADVERSARIES = 12;
+  public static final int NUMBER_OF_ADVERSARIES = 4;
   public static String messageAuthor = RANDOM_AUTHOR;
   public static boolean popularAuthor = false;
   
@@ -90,7 +90,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   // public static final double GOWALLA_MAX_LONGITUDE = -118.4911912;
   
 
-  private String traceIndexFilename = GOWALLA_MOBILITY_TRACE_FILE; //CABSPOTTING_MOBILITY_TRACE_INDEX_FILE;
+  private String traceIndexFilename = CABSPOTTING_MOBILITY_TRACE_INDEX_FILE; //GOWALLA_MOBILITY_TRACE_FILE; //CABSPOTTING_MOBILITY_TRACE_INDEX_FILE;
 
   /** The agent which measures the simulation and reports statistics on it. */
   public Steppable measurer = new SingleMessageTrackingMeasurer(this);
@@ -109,11 +109,11 @@ public class ProximitySimulation extends MessagePropagationSimulation {
 
     schedule.scheduleOnce(measurer);     
 
-    // addCabspottingPeopleAndRandomSocialNetwork(); 
-    addGowallaPeopleAndSocialNetwork();
+    addCabspottingPeopleAndRandomSocialNetwork(); 
+    // addGowallaPeopleAndSocialNetwork();
     
     // Throw in some adversaries at the lowest-degree nodes
-    // createAdversaries();
+    createAdversaries();
     
     
     // addSybilAndJammingStuff(); (NEVER CALL THIS! It recreates the network!)
@@ -323,7 +323,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
           
           MobilityTrace trace = new MobilityTrace(locations);
           person.addMobilityTrace(trace);
-          // System.err.println("trace has this many entries "+trace.locations.size());
+          System.err.println("trace has this many entries "+trace.locations.size());
           person.schedule();
           // System.err.println(chunk.size() + " check-ins for person with ID " + id);
         } else {
@@ -448,7 +448,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public void createAdversaries(){
     // --------Assign adversaries to the worst-connected nodes--------------
     Bag people = socialNetwork.getAllNodes();
-    
+    System.err.println("hi");
     // Get the ordered list of nodes in increasing degree
     List<Integer> indices = orderNodesByDegree(people);
     
@@ -457,6 +457,8 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     Bag allAdversaryFriends = new Bag();
     Bag allAdversaries = new Bag();
     Bag myFriends = new Bag();
+    System.err.println("\n\nThe adversaries have this many friends: "+allAdversaryFriends.numObjs);
+    
     while ( numAdversaries < NUMBER_OF_ADVERSARIES) {
         // find which node has the cnt lowest degree
         int authorIdx = indices.get(numAdversaries);
@@ -480,6 +482,8 @@ public class ProximitySimulation extends MessagePropagationSimulation {
             }
         }
     }
+    
+    System.err.println("The adversaries have this many friends: "+allAdversaryFriends.numObjs);
     
     
     // Make sure each adversary has the ENTIRE adversarial Bag-o-friends

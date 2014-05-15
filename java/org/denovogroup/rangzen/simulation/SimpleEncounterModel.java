@@ -9,7 +9,7 @@ import java.util.List;
 public class SimpleEncounterModel implements Steppable {
   private static final long serialVersionUID = 1;
 
-  private static final double encounterChance = 0.0035;
+  private static final double encounterChance = 0.05;
 
   public void step(SimState state) {
     MessagePropagationSimulation sim = (MessagePropagationSimulation) state;

@@ -148,7 +148,7 @@ public class Person extends SimplePortrayal2D implements Steppable {
       // if (!messageQueue.contains(m)) {
       if (!queueHasMessageWithContent(m)) {
         Message copy = m.clone();
-        copy.priority = computeNewPriority(m.priority, sharedFriends.size(), getFriends().size());
+        copy.priority = computeNewPriority(m.priority, sharedFriends.size(), getFriends().size(),sender);
         addMessageToQueue(copy);
         // System.out.println(name+"/"+otherName+": "+messageQueue.peek());
       }
@@ -167,7 +167,8 @@ public class Person extends SimplePortrayal2D implements Steppable {
 
   public double computeNewPriority(double priority, 
                                    int sharedFriends, 
-                                   int myFriends) {
+                                   int myFriends,
+                                   Person sender) {
     if (trustPolicy == TRUST_POLICY_FRACTION_OF_FRIENDS) {
       return computeNewPriority_fractionOfFriends(priority, sharedFriends, myFriends);
     }
@@ -178,7 +179,7 @@ public class Person extends SimplePortrayal2D implements Steppable {
       return computeNewPriority_sigmoidFractionOfFriends(priority, sharedFriends, myFriends);
     }
     else if (trustPolicy == TRUST_POLICY_ADVERSARY) {
-      return computeNewPriority_adversary(priority, sharedFriends, myFriends);
+      return computeNewPriority_adversary(priority, sharedFriends, myFriends,sender);
     }
     else {
       return computeNewPriority_maxFriends(priority, sharedFriends, myFriends);
@@ -228,9 +229,14 @@ public class Person extends SimplePortrayal2D implements Steppable {
   
   public static double computeNewPriority_adversary(double priority,
                                                             int sharedFriends,
-                                                            int myFriends) {
-    // the adversary trusts nobody's messages but his own
-    return 0.0;
+                                                            int myFriends,
+                                                            Person sender) {
+    // the adversary accepts nobody's messages except for other those of other adversaries
+    if (sender.trustPolicy == TRUST_POLICY_ADVERSARY) {
+        return 1.0;
+    } else {
+        return 0.0;
+    }
   }
 
 

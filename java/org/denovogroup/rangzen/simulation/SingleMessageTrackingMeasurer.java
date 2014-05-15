@@ -47,17 +47,27 @@ public class SingleMessageTrackingMeasurer implements Steppable {
   public void step(SimState state) {
     MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
     double time = sim.schedule.getTime();
+    String author;
+    boolean popularAuthor;
     
     if (sim.schedule.getSteps() == 0) {
       /** Compose a message */
-      if (((ProximitySimulation)sim).messageAuthor == ProximitySimulation.POPULAR_AUTHOR) {
-        if (((ProximitySimulation)sim).popularAuthor) {
+      try { 
+        author = ((ProximitySimulation)sim).messageAuthor;
+        popularAuthor = ((ProximitySimulation)sim).popularAuthor;
+      } catch (ClassCastException e) {
+        author = ((StAndrewsSimulation)sim).messageAuthor;
+        popularAuthor = ((StAndrewsSimulation)sim).popularAuthor;
+      }
+        
+      if (author == ProximitySimulation.POPULAR_AUTHOR) {
+        if (popularAuthor) {
             System.err.println("Message from a popular person.");
         } else {
             System.err.println("Message from an unpopular person.");
         }
-        authorMessagePopular(((ProximitySimulation)sim).popularAuthor);//Authors a message from a popular or unpopular node
-      } else if (((ProximitySimulation)sim).messageAuthor == ProximitySimulation.ADVERSARIAL_AUTHOR) {
+        authorMessagePopular(popularAuthor);//Authors a message from a popular or unpopular node
+      } else if (author == ProximitySimulation.ADVERSARIAL_AUTHOR) {
         authorMessageAdversarial(); // author a message from an adversary
         System.err.println("Message from an adversary.");
       } else {
@@ -99,11 +109,13 @@ public class SingleMessageTrackingMeasurer implements Steppable {
 
   private void authorMessage() {
     Bag people = sim.socialNetwork.getAllNodes();
+    Bag tmp = new Bag();
     // Random randomGenerator = new Random();
     if (people.numObjs > 0) {
       // Person person = (Person) people.objs[0];
       Person person = (Person) people.objs[sim.random.nextInt(people.numObjs)];
       person.addMessageToQueue(trackedMessage);
+      System.err.println("degree of the author is "+sim.socialNetwork.getEdges(person, tmp).numObjs);
       
     }
   }
@@ -124,7 +136,6 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     // if popularFlag == true, start the message from a popular node
     // else, start it from an unpopular node
     int author; 
-    int boundary = 5;
     Bag people = sim.socialNetwork.getAllNodes();
     
     if (people.numObjs == 0) { 
@@ -135,8 +146,7 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     List<Integer> indices = sim.orderNodesByDegree(people);
     
     //Choose an (un)popular node at random among the (bottom) top 'boundary' degrees
-    author = sim.random.nextInt(boundary);
-    author = 2; // either 2 or 48
+    author = 1; // either 2 or 48
     if (popularFlag) {
         author = people.numObjs - author;
     } else { 
@@ -154,9 +164,10 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     person = (Person) people.objs[authorIdx];
     // System.err.println("Degree = " + (sim.socialNetwork.getEdges(person).numObjs) + "and author is " + author);
         
-    // Add the person to the queue
+    // Add the message to the queue
     person.addMessageToQueue(trackedMessage);
-    
+    Bag tmp = new Bag();
+    System.err.println("degree of the author is "+sim.socialNetwork.getEdges(person, tmp).numObjs);
   }
 
   private class OutputData {
