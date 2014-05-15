@@ -6,7 +6,7 @@ filebase = '400nodes/sybil'
 
 
 try:
-    os.system(" ~/buck/bin/buck build proximitySimulationNoGUI")
+    os.system("buck build proximitySimulationNoGUI")
 except:
     exit()
 
