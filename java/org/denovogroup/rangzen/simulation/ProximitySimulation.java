@@ -46,7 +46,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static final String ADVERSARIAL_AUTHOR = "Adversarial author";
   public static final String POPULAR_AUTHOR = "(Un)popular author";
   
-  public static final int NUMBER_OF_ADVERSARIES = 6;
+  public static final int NUMBER_OF_ADVERSARIES = 3;
   public static String messageAuthor = RANDOM_AUTHOR;
   public static boolean popularAuthor = false;
   
