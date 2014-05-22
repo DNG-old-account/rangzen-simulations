@@ -28,7 +28,7 @@ public class ProximityEncounterModel implements Steppable {
                 Bag neighborhood = 
                     sim.space.getNeighborsExactlyWithinDistance(location, sim.JAMMING_RADIUS);
                     for (Object p2 : neighborhood) {
-                        if (((Person) p2).trustPolicy == Person.TRUST_POLICY_ADVERSARY) {
+                        if (((Person) p2).trustPolicy == Person.TRUST_POLICY_ADVERSARY_JAMMER) {
                             jammed = true;
                             break;
                         }

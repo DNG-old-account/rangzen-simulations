@@ -165,7 +165,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
         if (staticJammingOptimal) {
             try {
                 String csvFile = CABSPOTTING_OPTIMAL_JAMMER_LOCATIONS + "cabspotting_"+((int)JAMMING_RADIUS)+".csv";
-                readOptimalJammerLocations(csvFile);
+                placeOptimalJammers(csvFile);
             }
             catch (Exception e) {
                 placeJammersRandomly();
@@ -175,6 +175,11 @@ public class ProximitySimulation extends MessagePropagationSimulation {
             //random locations
             placeJammersRandomly();
         }
+    }
+    
+    // set up mobile jammers (as members of the adversarial team)
+    if (mobileJamming) {
+        placeMobileJammers();
     }
 
   }
@@ -188,7 +193,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
   }
   
-  private void readOptimalJammerLocations(String csvFile) {
+  private void placeOptimalJammers(String csvFile) {
     BufferedReader br = null;
 	String line = "";
 	String cvsSplitBy = ",";
@@ -226,7 +231,25 @@ public class ProximitySimulation extends MessagePropagationSimulation {
 	}
   
   }
-  
+ 
+  private void placeMobileJammers() {
+    int numJammers = 0;
+    Bag people = socialNetwork.getAllNodes();
+    for (Object person : people) {
+        if (((Person) person).trustPolicy == Person.TRUST_POLICY_ADVERSARY) {
+            ((Person) person).trustPolicy = Person.TRUST_POLICY_ADVERSARY_JAMMER;
+            System.err.println("Assigned node "+((Person) person).name + " to be a mobile jammer.");
+            numJammers += 1;
+        }
+        if (numJammers >= NUMBER_OF_MOBILE_JAMMERS) {
+            break;
+        }
+    }
+    if (numJammers < NUMBER_OF_MOBILE_JAMMERS) {
+        System.err.println("You don't have enough adversaries to establish this many mobile jammers. Please set the -na flag.");
+    }
+  }
+ 
   private void addGowallaPeopleAndSocialNetwork() {
     // Parse the social network file.
     try {

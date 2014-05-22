@@ -28,6 +28,7 @@ public class Person extends SimplePortrayal2D implements Steppable {
   public static final String TRUST_POLICY_MAX_FRIENDS = "MAX FRIENDS";
   public static final String TRUST_POLICY_SIGMOID_FRACTION_OF_FRIENDS = "SIGMOID FRACTION OF FRIENDS";
   public static final String TRUST_POLICY_ADVERSARY = "TRUST ONLY OTHER ADVERSARIES";
+  public static final String TRUST_POLICY_ADVERSARY_JAMMER = "TRUST ONLY OTHER ADVERSARIES AND JAM";
   
   // simulation parameters
   public static final int MAX_QUEUE_LENGTH = 5;
