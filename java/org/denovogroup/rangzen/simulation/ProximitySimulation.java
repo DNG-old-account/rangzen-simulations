@@ -429,20 +429,22 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     boolean adversaryFlag = false;
     for (Object person : people) {      
       for (Object otherPerson : people) {
-        if (person == otherPerson) {
+        // make sure that the two people are not the same and not already friends
+        if (person == otherPerson || areFriends(person,otherPerson)) {
             continue;
         }
+        
         // Draw an edge according to Barabasi-Albert model
         probability = random.nextDouble();
+        
         // how much a node is likely to attract a new node
         socialNetwork.getEdges(person,friends);
         attractiveness = ((double)friends.numObjs)/totalDegree + 0.02;
         if ((probability < attractiveness) || (totalDegree == 0)){
         
-          double buddiness = 1.0;
-          socialNetwork.addEdge(person, otherPerson, new Double(buddiness));
-          totalDegree = totalDegree + 1;
-          // System.out.println(person + " is friends with " + personB);
+            double buddiness = 1.0;
+            socialNetwork.addEdge(person, otherPerson, new Double(buddiness));
+            totalDegree = totalDegree + 1;
         }
       }
     }
@@ -490,13 +492,19 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     double buddiness = 1.0;
     for (Object adv : allAdversaries) {
         for (Object friend : allAdversaryFriends ) {
-            socialNetwork.getEdges(adv,myFriends);
-            if (! bagContains(myFriends,friend)) {
+            if (! areFriends(adv,friend)) {
                 socialNetwork.addEdge(adv, friend, new Double(buddiness));
             }
         }
     }
     
+  }
+  
+  public boolean areFriends(Object node1, Object node2) {
+    // checks if node1 and node2 are friends
+    Bag myFriends = new Bag();  
+    socialNetwork.getEdges(node1,myFriends);
+    return bagContains(myFriends,node2);
   }
 
   public void setObjectLatLonLocation(Object object, Location location) {
