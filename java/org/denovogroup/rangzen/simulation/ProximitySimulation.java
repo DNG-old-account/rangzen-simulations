@@ -621,10 +621,29 @@ public class ProximitySimulation extends MessagePropagationSimulation {
             catch (NumberFormatException e) {
                 System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
             }
-            if (nAdv > 0) {
+            if ((nAdv > 0) && (nAdv < NUMBER_OF_PEOPLE)) {
                 NUMBER_OF_ADVERSARIES = nAdv;
+            } else {
+                System.err.println("Please enter a valid number of adversaries.");
             }
             System.err.println("set the number of adversaries to "+NUMBER_OF_ADVERSARIES);
+        }
+        
+        if( line.hasOption( "auth" ) ) {
+            // initialise the member variable
+            String popularity = line.getOptionValue( "auth" );
+            System.err.println("popularity is "+popularity);
+            if (popularity.equals("r")) {
+                messageAuthor = RANDOM_AUTHOR;
+            } else if (popularity.equals("p")) {
+                messageAuthor = POPULAR_AUTHOR;
+                popularAuthor = true;
+            } else if (popularity.equals("u")) {
+                messageAuthor = POPULAR_AUTHOR;
+                popularAuthor = false;
+            } else if (popularity.equals("a")) {
+                messageAuthor = ADVERSARIAL_AUTHOR;
+            }
         }
     } 
     catch( Exception exp ) {
@@ -640,9 +659,6 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     Options options = createCommandLineOptions();
 
     parseOptions(args,options);
-    
-    
-    
     
     
     // if (args.length > 0) {
