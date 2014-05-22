@@ -155,6 +155,59 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     System.out.println(jsonOutput);
   }
   
+  
+  /** Adversary-related methods **/
+  
+  public void createAdversaries(){
+    // --------Assign adversaries to the worst-connected nodes--------------
+    Bag people = socialNetwork.getAllNodes();
+    // Get the ordered list of nodes in increasing degree
+    List<Integer> indices = orderNodesByDegree(people);
+    
+    // Now assign the lowest-connected nodes to adversaries
+    int numAdversaries = 0;
+    Bag allAdversaryFriends = new Bag();
+    Bag allAdversaries = new Bag();
+    Bag myFriends = new Bag();    
+    while ( numAdversaries < NUMBER_OF_ADVERSARIES) {
+        // find which node has the cnt lowest degree
+        int authorIdx = indices.get(numAdversaries);
+        
+        // assign adversaries to lowest-degree nodes
+        Person person = (Person) people.objs[authorIdx];
+            
+        // Make the person an adversary
+        
+        person.trustPolicy = Person.TRUST_POLICY_ADVERSARY;
+        allAdversaries.add(person);
+        
+        numAdversaries++;
+                    
+        // Add this person's friends to the adversarial Bag-o-friends
+        socialNetwork.getEdges(person,myFriends);
+        for ( Object friend : myFriends ) {
+            Object otherNode = ((Edge) friend).getOtherNode(person);
+            if (! bagContains(allAdversaryFriends, otherNode )) {
+                allAdversaryFriends.add(otherNode);
+            }
+        }
+    }
+    
+    System.err.println("The adversaries have this many friends: "+allAdversaryFriends.numObjs);
+    
+    
+    // Make sure each adversary has the ENTIRE adversarial Bag-o-friends
+    double buddiness = 1.0;
+    for (Object adv : allAdversaries) {
+        for (Object friend : allAdversaryFriends ) {
+            if (! areFriends(adv,friend)) {
+                socialNetwork.addEdge(adv, friend, new Double(buddiness));
+            }
+        }
+    }
+    
+  }
+  
   private void addJammers() {
     /** This method adds stationary jammers to the grid in either optimally-chosen or random locations */ 
     
@@ -250,6 +303,9 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
   }
  
+ 
+ /** Mobility and social-graph related methods **/
+ 
   private void addGowallaPeopleAndSocialNetwork() {
     // Parse the social network file.
     try {
@@ -334,17 +390,6 @@ public class ProximitySimulation extends MessagePropagationSimulation {
       System.exit(1);
     }
   }
-
-  private Person getPersonWithID(int id) {
-    Bag people = socialNetwork.getAllNodes();
-    for (int i=0; i<people.numObjs; i++) {
-      Person p = (Person) people.objs[i];
-      if (p.name == id) {
-        return p;
-      }
-    }
-    return null;
-  }
   
   private void addCabspottingPeopleAndRandomSocialNetwork() {
     List<String> locationTraceFilenames;
@@ -400,24 +445,6 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
   }
   
-  public boolean arrayContains(int[] ar, int value) {
-    for (int i = 0; i<ar.length; i++) {
-        if (ar[i] == value){
-            return true;
-        }
-    }
-    return false;
-  }
-  
-  public boolean bagContains(Bag bag, Object obj) {
-    for (Object item : bag) {
-        if (item == obj){
-            return true;
-        }
-    }
-    return false;
-  }
-  
   private void addScaleFreeRandomSocialGraph() {
     /** Implements the Barabasi-Albert model for building a social graph */
     Bag people = socialNetwork.getAllNodes();
@@ -450,54 +477,35 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
   }
   
-  public void createAdversaries(){
-    // --------Assign adversaries to the worst-connected nodes--------------
+  /** Utilities **/
+  
+  private Person getPersonWithID(int id) {
     Bag people = socialNetwork.getAllNodes();
-    // Get the ordered list of nodes in increasing degree
-    List<Integer> indices = orderNodesByDegree(people);
-    
-    // Now assign the lowest-connected nodes to adversaries
-    int numAdversaries = 0;
-    Bag allAdversaryFriends = new Bag();
-    Bag allAdversaries = new Bag();
-    Bag myFriends = new Bag();    
-    while ( numAdversaries < NUMBER_OF_ADVERSARIES) {
-        // find which node has the cnt lowest degree
-        int authorIdx = indices.get(numAdversaries);
-        
-        // assign adversaries to lowest-degree nodes
-        Person person = (Person) people.objs[authorIdx];
-            
-        // Make the person an adversary
-        
-        person.trustPolicy = Person.TRUST_POLICY_ADVERSARY;
-        allAdversaries.add(person);
-        
-        numAdversaries++;
-                    
-        // Add this person's friends to the adversarial Bag-o-friends
-        socialNetwork.getEdges(person,myFriends);
-        for ( Object friend : myFriends ) {
-            Object otherNode = ((Edge) friend).getOtherNode(person);
-            if (! bagContains(allAdversaryFriends, otherNode )) {
-                allAdversaryFriends.add(otherNode);
-            }
+    for (int i=0; i<people.numObjs; i++) {
+      Person p = (Person) people.objs[i];
+      if (p.name == id) {
+        return p;
+      }
+    }
+    return null;
+  }
+  
+  public boolean arrayContains(int[] ar, int value) {
+    for (int i = 0; i<ar.length; i++) {
+        if (ar[i] == value){
+            return true;
         }
     }
-    
-    System.err.println("The adversaries have this many friends: "+allAdversaryFriends.numObjs);
-    
-    
-    // Make sure each adversary has the ENTIRE adversarial Bag-o-friends
-    double buddiness = 1.0;
-    for (Object adv : allAdversaries) {
-        for (Object friend : allAdversaryFriends ) {
-            if (! areFriends(adv,friend)) {
-                socialNetwork.addEdge(adv, friend, new Double(buddiness));
-            }
+    return false;
+  }
+  
+  public boolean bagContains(Bag bag, Object obj) {
+    for (Object item : bag) {
+        if (item == obj){
+            return true;
         }
     }
-    
+    return false;
   }
   
   public boolean areFriends(Object node1, Object node2) {
@@ -583,6 +591,8 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     super(seed);
   }
 
+  /** Command-line options-related methods **/
+  
   public static Options createCommandLineOptions() {
     
     // Number of nodes
@@ -745,6 +755,9 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     return variable;
   
   }
+  
+  
+  /** main **/
   
   public static void main(String[] args) {
   
