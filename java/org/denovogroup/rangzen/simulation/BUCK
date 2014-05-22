@@ -16,5 +16,6 @@ java_library(
     '//libs:mason',
     '//libs:opencsv',
     '//libs:gson',
+    '//libs:commons-cli',
   ],
 )

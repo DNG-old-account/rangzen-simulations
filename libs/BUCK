@@ -31,3 +31,9 @@ prebuilt_jar(
   binary_jar = 'gson-2.2.4.jar',
   visibility = [ 'PUBLIC' ],
 )
+
+prebuilt_jar(
+  name = 'commons-cli',
+  binary_jar = 'commons-cli-1.2.jar',
+  visibility = [ 'PUBLIC' ],
+)

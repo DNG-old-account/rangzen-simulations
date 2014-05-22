@@ -64,9 +64,6 @@ public class Person extends SimplePortrayal2D implements Steppable {
     // initialize the message queue
     /** Comment this for loop to simulate infinite capacity */
     for (int i=0; i<MAX_QUEUE_LENGTH; i++) {
-      // double p = getGaussian(MEAN,VAR);
-      // p = Math.min(p,1);
-      // p = Math.max(p,0);
       double p = sim.random.nextDouble();
       addMessageToQueue(new Message(UUID.randomUUID().toString(), p));
     }
@@ -140,9 +137,9 @@ public class Person extends SimplePortrayal2D implements Steppable {
     // System.out.println();
     int otherName = sender.name;
     // double trustMultiplier = 
-    //       sharedFriends.size() / MessagePropagationSimulation.MAX_FRIENDS;
+    //       sharedFriends.size() / ProximitySimulation.MAX_FRIENDS;
     // if (sharedFriends.size() == 0) {
-    //   trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
+    //   trustMultiplier = ProximitySimulation.EPSILON_TRUST;
     // }
     for (Message m : newMessages) {
       // if (!messageQueue.contains(m)) {
@@ -190,9 +187,9 @@ public class Person extends SimplePortrayal2D implements Steppable {
                                                      int sharedFriends, 
                                                      int myFriends) {
     double trustMultiplier =  
-            sharedFriends / (double) MessagePropagationSimulation.MAX_FRIENDS;
+            sharedFriends / (double) ProximitySimulation.MAX_FRIENDS;
     if (sharedFriends == 0) {
-          trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
+          trustMultiplier = ProximitySimulation.EPSILON_TRUST;
     }
     return priority * trustMultiplier;
   } 
@@ -201,7 +198,7 @@ public class Person extends SimplePortrayal2D implements Steppable {
                                                             int myFriends) {
     double trustMultiplier = sharedFriends / (double) myFriends;
     if (sharedFriends == 0) {
-          trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
+          trustMultiplier = ProximitySimulation.EPSILON_TRUST;
     }
     return priority * trustMultiplier;
   } 
@@ -218,7 +215,7 @@ public class Person extends SimplePortrayal2D implements Steppable {
     trustMultiplier = Math.max(trustMultiplier,0);
     
     if (sharedFriends == 0) {
-          trustMultiplier = MessagePropagationSimulation.EPSILON_TRUST;
+          trustMultiplier = ProximitySimulation.EPSILON_TRUST;
     }
     return priority * trustMultiplier;
   }

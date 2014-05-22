@@ -28,6 +28,18 @@ import java.util.TreeMap;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
+import org.apache.commons.cli.AlreadySelectedException;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.MissingArgumentException;
+import org.apache.commons.cli.MissingOptionException;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.UnrecognizedOptionException;
+
 public class ProximitySimulation extends MessagePropagationSimulation {
   private static final long serialVersionUID = 1;
 
@@ -40,23 +52,33 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static final int height = 33360;
   public static final double discretization = 
           ProximityEncounterModel.NEIGHBORHOOD_RADIUS * 2;
+          
+  // Population parameters        
+  public static int NUMBER_OF_PEOPLE = 100;
+  public static int NUMBER_OF_ADVERSARIES = 2;
+  
+  // -------Simulation parameters------//
+  public static final double EPSILON_TRUST = .001;
+  public static final int MAX_FRIENDS = 40;
+  public static final double MAX_RUNTIME = 150; // in hours
+  
+  // Jamming
+  public static final boolean mobileJamming = false;
+  public static final boolean staticJamming = false;
+  public static final boolean staticJammingOptimal = false;
+  public static final int NUMBER_OF_STATIC_JAMMERS = 0;
+  public static final double JAMMING_RADIUS = 50.0; // meters  
    
-  // Adversary tests
+  
+  // Message authorship
   public static final String RANDOM_AUTHOR = "Random author";
   public static final String ADVERSARIAL_AUTHOR = "Adversarial author";
   public static final String POPULAR_AUTHOR = "(Un)popular author";
   
-  public static final int NUMBER_OF_ADVERSARIES = 3;
   public static String messageAuthor = RANDOM_AUTHOR;
   public static boolean popularAuthor = false;
-  
-  public static final boolean mobileJamming = false;
-  public static final boolean staticJamming = false;
-  public static final boolean staticJammingOptimal = false;
-  
-  public static final int NUMBER_OF_STATIC_JAMMERS = 5;
-  public static final double JAMMING_RADIUS = 5000.0; // meters
 
+ // Mobility trace
   public static final String CABSPOTTING_MOBILITY_TRACE_INDEX_FILE =
           "data/cabdatafiles.txt";
 
@@ -116,7 +138,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     createAdversaries();
     
     
-    // addSybilAndJammingStuff(); (NEVER CALL THIS! It recreates the network!)
+    addJammers(); 
     
 
     System.err.println("Start() complete. All input files parsed.");
@@ -128,7 +150,9 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     System.out.println(jsonOutput);
   }
   
-  private void addSybilAndJammingStuff() {
+  private void addJammers() {
+    /** This method adds stationary jammers to the grid in either optimally-chosen or random locations */ 
+    
     // Set up static jammers
     if (staticJamming) {
                
@@ -157,11 +181,6 @@ public class ProximitySimulation extends MessagePropagationSimulation {
             jammerLocations.add(new Double2D(37.7836, -122.4076));
             jammerLocations.add(new Double2D(37.7798, -122.4183));
             jammerLocations.add(new Double2D(37.7950, -122.4076));
-            // jammerLocations.add(new Double2D(37.7912, -122.4239));
-            // jammerLocations.add(new Double2D(37.7817, -122.4006));
-            // jammerLocations.add(new Double2D(37.8019, -122.4107));
-            // jammerLocations.add(new Double2D(37.7931, -122.4025));
-            // jammerLocations.add(new Double2D(37.7868, -122.4120));
         }else if (JAMMING_RADIUS == 1000 && staticJammingOptimal) {
             jammerLocations.add(new Double2D(37.7937, -122.4280));
             jammerLocations.add(new Double2D(37.7566, -122.4000));
@@ -201,55 +220,6 @@ public class ProximitySimulation extends MessagePropagationSimulation {
             }
         }
     }
-    
-    // Create the people as either adversaries or regular citizens
-    Person p;
-    List<String> locationTraceFilenames;
-    try {
-      locationTraceFilenames = getLocationTraceFilenames(traceIndexFilename); 
-      // System.out.println(locationTraceFilenames);
-    } catch (FileNotFoundException e) {
-      System.err.println(e);
-      locationTraceFilenames = new ArrayList<String>();
-    }
-    Iterator<String> traceIterator = locationTraceFilenames.iterator();
-    for (int i=0; i<NUMBER_OF_PEOPLE; i++) {
-      // System.err.println("Here:" + i + " " + arrayContains(adversaries,i));
-      
-      //--------- Add people to the network-----------
-      p = new Person(i, Person.TRUST_POLICY_SIGMOID_FRACTION_OF_FRIENDS, this);
-      
-      
-      // Place the person somewhere near-ish the middle of the space.
-      // Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
-      //     space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
-      // space.setObjectLocation(p, randomLoc);
-
-      try {
-        p.addMobilityTrace(traceIterator.next());
-        setObjectLatLonLocation(p, p.mobilityTrace.locations.get(0));
-      } catch (FileNotFoundException e) {
-        System.err.println(e);
-        // Well.
-      }
-      // System.err.println("Person: " + ((Person)p).trustPolicy);
-
-      // See call to add social edges below. Here people are simply
-      // added as entities in the network.
-      
-      socialNetwork.addNode(p);
-
-      // Schedule the person to move, author messages, etc.
-      // schedule.scheduleRepeating(p);
-      p.schedule();
-    }
-    System.err.println("Adding scale-free social graph.");
-    addScaleFreeRandomSocialGraph();
-    
-    // Throw in some adversaries at the lowest-degree nodes
-    createAdversaries();
-    // schedule.scheduleRepeating(new SimpleEncounterModel());
-    // schedule.scheduleOnce(new ProximityEncounterModel());
 
   }
   
@@ -348,6 +318,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
     return null;
   }
+  
   private void addCabspottingPeopleAndRandomSocialNetwork() {
     List<String> locationTraceFilenames;
     try {
@@ -378,11 +349,14 @@ public class ProximitySimulation extends MessagePropagationSimulation {
       p.schedule();
 
     }
+    
+    //Adds a Barabasi-Albert social graph
     addScaleFreeRandomSocialGraph();
   }
 
 
   private void addRandomSocialEdges() {
+  /** Adds a uniformly random social graph-- just picks 5 nodes for each node to be connected to */
     Bag people = socialNetwork.getAllNodes();
     for (Object person : people) {
       for (int i=0; i<5; i++) {
@@ -398,6 +372,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
       }
     }
   }
+  
   public boolean arrayContains(int[] ar, int value) {
     for (int i = 0; i<ar.length; i++) {
         if (ar[i] == value){
@@ -448,7 +423,6 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public void createAdversaries(){
     // --------Assign adversaries to the worst-connected nodes--------------
     Bag people = socialNetwork.getAllNodes();
-    System.err.println("hi");
     // Get the ordered list of nodes in increasing degree
     List<Integer> indices = orderNodesByDegree(people);
     
@@ -456,9 +430,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     int numAdversaries = 0;
     Bag allAdversaryFriends = new Bag();
     Bag allAdversaries = new Bag();
-    Bag myFriends = new Bag();
-    System.err.println("\n\nThe adversaries have this many friends: "+allAdversaryFriends.numObjs);
-    
+    Bag myFriends = new Bag();    
     while ( numAdversaries < NUMBER_OF_ADVERSARIES) {
         // find which node has the cnt lowest degree
         int authorIdx = indices.get(numAdversaries);
@@ -575,23 +547,120 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     super(seed);
   }
 
-  public static void main(String[] args) {
-    if (args.length > 0) {
-        for (String arg : args){
-            System.err.println(arg);
-            if (arg.equals("-r")) {
-                messageAuthor = RANDOM_AUTHOR;
-            } else if (arg.equals("-p")) {
-                messageAuthor = POPULAR_AUTHOR;
-                popularAuthor = true;
-            } else if (arg.equals("-u")) {
-                messageAuthor = POPULAR_AUTHOR;
-                popularAuthor = false;
-            } else if (arg.equals("-a")) {
-                messageAuthor = ADVERSARIAL_AUTHOR;
+  public static Options createCommandLineOptions() {
+    
+    // Number of nodes
+    Option numNodes   = OptionBuilder.withArgName( "NUM_NODES" )
+                                .hasArg()
+                                .withType(Number.class)
+                                .withDescription(  "use <NUM_NODES> number of nodes in the simulation" )
+                                .create( "nn" );
+    // Number of adversaries
+    Option numAdversaries   = OptionBuilder.withArgName( "NUM_ADVERSARIES" )
+                                .hasArg()
+                                .withType(Number.class)
+                                .withDescription(  "use <NUM_ADVERSARIES> number of adversaries in the simulation" )
+                                .create( "na" );
+    
+    // Message authorship
+    Option authorship       = OptionBuilder.withArgName( "author" )
+                                .hasArg()
+                                .withDescription(  "use author with the given popularity in the simulation (p=popular,u=unpopular,a=adversarial,r=random)" )
+                                .create( "auth" );
+    
+    // Stationary jamming option
+    Option stationaryJammers = OptionBuilder.withArgName( "num stationary jammers, jammer radius" )
+                                .hasArgs(2)
+                                .withValueSeparator()
+                                .withDescription( "How many stationary jammers to use, and what radius to give them" )
+                                .create( "stationaryJammers" );
+                                            
+    // Mobile jamming option
+    Option mobileJammers = OptionBuilder.withArgName( "num mobile jammers, jammer radius" )
+                                .hasArgs(2)
+                                .withValueSeparator()
+                                .withDescription( "How many mobile jammers to use, and what radius to give them" )
+                                .create( "mobileJammers" );
+                                            
+    Options options = new Options();
+    options.addOption( numNodes );
+    options.addOption( numAdversaries );
+    options.addOption( authorship );
+    options.addOption( stationaryJammers );
+    return options;
+  }
+  
+  public static void parseOptions(String[] args, Options options) {
+    // create the parser
+    GnuParser parser = new GnuParser();
+    try {
+        // parse the command line arguments
+        CommandLine line = parser.parse( options, args );
+        // has the numnodes argument been passed?
+        if( line.hasOption( "nn" ) ) {
+            // initialise the member variable
+            int nPeople = -1;
+            try {
+                nPeople = Integer.parseInt( line.getOptionValue( "nn" ));
             }
+            catch (NumberFormatException e) {
+                System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
+            }
+            if (nPeople > 0) {
+                NUMBER_OF_PEOPLE = nPeople;
+            }
+            System.err.println("set the number of people to "+NUMBER_OF_PEOPLE);
         }
+        
+        if( line.hasOption( "na" ) ) {
+            // initialise the member variable
+            int nAdv = -1;
+            try {
+                nAdv = Integer.parseInt( line.getOptionValue( "na" ));
+            }
+            catch (NumberFormatException e) {
+                System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
+            }
+            if (nAdv > 0) {
+                NUMBER_OF_ADVERSARIES = nAdv;
+            }
+            System.err.println("set the number of adversaries to "+NUMBER_OF_ADVERSARIES);
+        }
+    } 
+    catch( Exception exp ) {
+        // oops, something went wrong
+        System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
     }
+  }
+  
+  public static void main(String[] args) {
+  
+    
+    // create Options object
+    Options options = createCommandLineOptions();
+
+    parseOptions(args,options);
+    
+    
+    
+    
+    
+    // if (args.length > 0) {
+        // for (String arg : args){
+            // System.err.println(arg);
+            // if (arg.equals("-r")) {
+                // messageAuthor = RANDOM_AUTHOR;
+            // } else if (arg.equals("-p")) {
+                // messageAuthor = POPULAR_AUTHOR;
+                // popularAuthor = true;
+            // } else if (arg.equals("-u")) {
+                // messageAuthor = POPULAR_AUTHOR;
+                // popularAuthor = false;
+            // } else if (arg.equals("-a")) {
+                // messageAuthor = ADVERSARIAL_AUTHOR;
+            // }
+        // }
+    // }
     doLoop(ProximitySimulation.class, args);
     System.exit(0);
   }

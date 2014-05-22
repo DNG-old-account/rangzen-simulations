@@ -99,7 +99,7 @@ public class SingleMessageTrackingMeasurer implements Steppable {
 
     // Stop running if the simulation has been going too long
     double hours = (time - minTimeSeen) / 1000 / 60 / 60;
-    if (seenTrackedMessageCount == MessagePropagationSimulation.NUMBER_OF_PEOPLE || (hours > sim.MAX_RUNTIME && sim.MAX_RUNTIME > 0) ) {
+    if (seenTrackedMessageCount == ProximitySimulation.NUMBER_OF_PEOPLE || (hours > ProximitySimulation.MAX_RUNTIME && ProximitySimulation.MAX_RUNTIME > 0) ) {
       sim.schedule.clear();
     }
 
@@ -110,7 +110,6 @@ public class SingleMessageTrackingMeasurer implements Steppable {
   private void authorMessage() {
     Bag people = sim.socialNetwork.getAllNodes();
     Bag tmp = new Bag();
-    // Random randomGenerator = new Random();
     if (people.numObjs > 0) {
       // Person person = (Person) people.objs[0];
       Person person = (Person) people.objs[sim.random.nextInt(people.numObjs)];
@@ -177,6 +176,7 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     public double maxTimeSeen;
     public double NEIGHBORHOOD_RADIUS;
     public double ENCOUNTER_CHANCE;
+    public double NUMBER_OF_ADVERSARIES;
     public double priority;
     public double duration;
     public double minutesDuration;
@@ -190,7 +190,8 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     o.maxTimeSeen = maxTimeSeen;
     o.NEIGHBORHOOD_RADIUS = ProximityEncounterModel.NEIGHBORHOOD_RADIUS;
     o.ENCOUNTER_CHANCE = ProximityEncounterModel.ENCOUNTER_CHANCE;
-    o.NUMBER_OF_PEOPLE = MessagePropagationSimulation.NUMBER_OF_PEOPLE;
+    o.NUMBER_OF_ADVERSARIES = ProximitySimulation.NUMBER_OF_ADVERSARIES;
+    o.NUMBER_OF_PEOPLE = ProximitySimulation.NUMBER_OF_PEOPLE;
     // Guessing that the time is in milliseconds instead of seconds
     if (maxTimeSeen > 1399679023 * 100) {
       o.duration = (maxTimeSeen - minTimeSeen) / MILLISECONDS_PER_SECOND;
