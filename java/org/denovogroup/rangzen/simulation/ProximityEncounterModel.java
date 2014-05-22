@@ -24,10 +24,10 @@ public class ProximityEncounterModel implements Steppable {
             // Check for a jammer in the jamming radius
             if (sim.mobileJamming) {
                 boolean jammed = false;
+                // Get all the node's neighbors, and check which ones are adversarial
                 Bag neighborhood = 
                     sim.space.getNeighborsExactlyWithinDistance(location, sim.JAMMING_RADIUS);
                     for (Object p2 : neighborhood) {
-                        // System.err.println("trust policy is "+((Person) p2).trustPolicy);
                         if (((Person) p2).trustPolicy == Person.TRUST_POLICY_ADVERSARY) {
                             jammed = true;
                             break;
@@ -38,12 +38,10 @@ public class ProximityEncounterModel implements Steppable {
                 }
             } else if (sim.staticJamming) {
                 boolean jammed = false;
-                // compute distance to all the jammers
+                // compute distance to all the jammers, and treat the node as jammed if one is within radius
                 for (int j=0; j<sim.jammerLocations.size(); j++) {
-                    // System.err.println("Distance from jammer is " + location.distance((Double2D) sim.jammerLocations.get(j)));
                     if (location.distance((Double2D) sim.jammerLocations.get(j)) < sim.JAMMING_RADIUS ) {
                         jammed = true;
-                        // System.err.println("found a jammer");
                         break;
                     }
                 }
@@ -52,6 +50,7 @@ public class ProximityEncounterModel implements Steppable {
                 }
             }
         
+            // If you're not jammed, just do a regular encounter with someone in your radius
             Bag neighborhood = 
                 sim.space.getNeighborsExactlyWithinDistance(location, 
                     NEIGHBORHOOD_RADIUS);
@@ -63,7 +62,6 @@ public class ProximityEncounterModel implements Steppable {
             }
         }
     }
-    // System.out.println("Done stepping encounter model");
 
   }
 

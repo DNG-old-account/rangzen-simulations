@@ -84,6 +84,8 @@ public class ProximitySimulation extends MessagePropagationSimulation {
  // Mobility trace
   public static final String CABSPOTTING_MOBILITY_TRACE_INDEX_FILE =
           "data/cabdatafiles.txt";
+  public static final String CABSPOTTING_OPTIMAL_JAMMER_LOCATIONS =
+          "data/cabspottingdata/jammerLocations/";
 
   public static final char QUOTE_CHAR = '"';
   
@@ -160,70 +162,69 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     if (staticJamming) {
                
         //strategic locations (From the simulated annleaing approach)
-        if (JAMMING_RADIUS == 100 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7857, -122.4173));
-            jammerLocations.add(new Double2D(37.7916, -122.4080));
-            jammerLocations.add(new Double2D(37.7911, -122.4129));
-            jammerLocations.add(new Double2D(37.7874, -122.4106));
-            jammerLocations.add(new Double2D(37.7971, -122.4106));
-        } else if (JAMMING_RADIUS == 200 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7964, -122.4056));
-            jammerLocations.add(new Double2D(37.7867, -122.4097));
-            jammerLocations.add(new Double2D(37.7989, -122.4088));
-            jammerLocations.add(new Double2D(37.7860, -122.4052));
-            jammerLocations.add(new Double2D(37.7906, -122.4095));
-        }else if (JAMMING_RADIUS == 500 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7964, -122.4338));
-            jammerLocations.add(new Double2D(37.7874, -122.4189));
-            jammerLocations.add(new Double2D(37.7910, -122.3991));
-            jammerLocations.add(new Double2D(37.7865, -122.4072));
-            jammerLocations.add(new Double2D(37.7959, -122.4077));
-        }else if (JAMMING_RADIUS == 700 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7887, -122.3968));
-            jammerLocations.add(new Double2D(37.7912, -122.4195));
-            jammerLocations.add(new Double2D(37.7836, -122.4076));
-            jammerLocations.add(new Double2D(37.7798, -122.4183));
-            jammerLocations.add(new Double2D(37.7950, -122.4076));
-        }else if (JAMMING_RADIUS == 1000 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7937, -122.4280));
-            jammerLocations.add(new Double2D(37.7566, -122.4000));
-            jammerLocations.add(new Double2D(37.7819, -122.4136));
-            jammerLocations.add(new Double2D(37.8000, -122.4099));
-            jammerLocations.add(new Double2D(37.7883, -122.3964));
-        }else if (JAMMING_RADIUS == 1300 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7971, -122.4312));
-            jammerLocations.add(new Double2D(37.7594, -122.4029));
-            jammerLocations.add(new Double2D(37.7888, -122.4065));
-            jammerLocations.add(new Double2D(37.7735, -122.4253));
-            jammerLocations.add(new Double2D(37.8135, -122.4135));
-        }else if (JAMMING_RADIUS == 1500 && staticJammingOptimal) {            
-            jammerLocations.add(new Double2D(37.7790, -122.4210));
-            jammerLocations.add(new Double2D(37.7586, -122.4007));
-            jammerLocations.add(new Double2D( 37.7912, -122.3966));
-            jammerLocations.add(new Double2D(37.7966, -122.4428));
-            jammerLocations.add(new Double2D(37.8088, -122.4170));
-        }else if (JAMMING_RADIUS == 2000 && staticJammingOptimal) {            
-            jammerLocations.add(new Double2D(37.7955, -122.4136));
-            jammerLocations.add(new Double2D(37.7755, -122.4445));
-            jammerLocations.add(new Double2D(37.6682, -122.3973));
-            jammerLocations.add(new Double2D(37.7591, -122.4100));
-            jammerLocations.add(new Double2D(37.7773, -122.3773));
-        }else if (JAMMING_RADIUS == 5000 && staticJammingOptimal) {            
-            jammerLocations.add(new Double2D(37.7469, -122.4715));
-            jammerLocations.add(new Double2D(37.7285, -122.3654));
-            jammerLocations.add(new Double2D(37.8300, -122.2915));
-            jammerLocations.add(new Double2D(37.8069, -122.4069));
-            jammerLocations.add(new Double2D(37.6685, -122.4254));
-        } else {
-            //random locations
-            for (int i=0; i<NUMBER_OF_STATIC_JAMMERS; i++) {
-                Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
-                                                space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
-                jammerLocations.add(randomLoc);
+        if (staticJammingOptimal) {
+            try {
+                String csvFile = CABSPOTTING_OPTIMAL_JAMMER_LOCATIONS + "cabspotting_"+((int)JAMMING_RADIUS)+".csv";
+                readOptimalJammerLocations(csvFile);
             }
+            catch (Exception e) {
+                placeJammersRandomly();
+            }
+        }
+        else {
+            //random locations
+            placeJammersRandomly();
         }
     }
 
+  }
+  
+  private void placeJammersRandomly() {
+    //place the jammers at random in the grid
+    for (int i=0; i<NUMBER_OF_STATIC_JAMMERS; i++) {
+        Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
+                                        space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
+        jammerLocations.add(randomLoc);
+    }
+  }
+  
+  private void readOptimalJammerLocations(String csvFile) {
+    BufferedReader br = null;
+	String line = "";
+	String cvsSplitBy = ",";
+    
+    try {
+		br = new BufferedReader(new FileReader(csvFile));
+        int numJammers = 0;
+		while ((line = br.readLine()) != null && numJammers < NUMBER_OF_STATIC_JAMMERS) {
+            double lat,lon;
+            // use comma as separator
+			String[] coords = line.split(cvsSplitBy);
+            lat = Double.parseDouble(coords[0]);
+            lon = Double.parseDouble(coords[1]);
+            System.err.println("Coordinates are "+lat+" , "+lon);
+            jammerLocations.add(new Double2D(lat, lon));
+            numJammers += 1;
+ 
+		}
+        if (numJammers < NUMBER_OF_STATIC_JAMMERS) {
+            System.err.println("Did not have enough optimal locations for all the jammers. Could only add "+numJammers+" jammers.");
+        }
+ 
+	} catch (FileNotFoundException e) {
+		e.printStackTrace();
+	} catch (IOException e) {
+		e.printStackTrace();
+	} finally {
+		if (br != null) {
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+  
   }
   
   private void addGowallaPeopleAndSocialNetwork() {
@@ -612,7 +613,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
         // parse the command line arguments
         CommandLine line = parser.parse( options, args );
         
-        // has the numnodes argument been passed?
+        // has the number of nodes argument been passed?
         NUMBER_OF_PEOPLE = parseIntegerArg( line, "nn" , NUMBER_OF_PEOPLE );
         if (NUMBER_OF_PEOPLE < 1) {
             // automatically generate the help statement
