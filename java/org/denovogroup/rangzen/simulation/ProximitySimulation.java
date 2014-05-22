@@ -27,12 +27,14 @@ import java.util.Date;
 import java.util.TreeMap;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.util.Properties;
 
 import org.apache.commons.cli.AlreadySelectedException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Option;
@@ -54,8 +56,8 @@ public class ProximitySimulation extends MessagePropagationSimulation {
           ProximityEncounterModel.NEIGHBORHOOD_RADIUS * 2;
           
   // Population parameters        
-  public static int NUMBER_OF_PEOPLE = 100;
-  public static int NUMBER_OF_ADVERSARIES = 2;
+  public static int NUMBER_OF_PEOPLE = 0;
+  public static int NUMBER_OF_ADVERSARIES = 0;
   
   // -------Simulation parameters------//
   public static final double EPSILON_TRUST = .001;
@@ -63,11 +65,12 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static final double MAX_RUNTIME = 150; // in hours
   
   // Jamming
-  public static final boolean mobileJamming = false;
-  public static final boolean staticJamming = false;
-  public static final boolean staticJammingOptimal = false;
-  public static final int NUMBER_OF_STATIC_JAMMERS = 0;
-  public static final double JAMMING_RADIUS = 50.0; // meters  
+  public static boolean mobileJamming = false;
+  public static boolean staticJamming = false;
+  public static boolean staticJammingOptimal = false;
+  public static int NUMBER_OF_STATIC_JAMMERS = 0;
+  public static int NUMBER_OF_MOBILE_JAMMERS = 0;
+  public static double JAMMING_RADIUS = 50.0; // meters  
    
   
   // Message authorship
@@ -390,6 +393,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
     return false;
   }
+  
   private void addScaleFreeRandomSocialGraph() {
     /** Implements the Barabasi-Albert model for building a social graph */
     Bag people = socialNetwork.getAllNodes();
@@ -550,43 +554,54 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static Options createCommandLineOptions() {
     
     // Number of nodes
-    Option numNodes   = OptionBuilder.withArgName( "NUM_NODES" )
+    Option numNodes   = OptionBuilder.withArgName( "int" )
                                 .hasArg()
                                 .withType(Number.class)
-                                .withDescription(  "use <NUM_NODES> number of nodes in the simulation" )
+                                .withDescription(  "use this number of nodes in the simulation" )
                                 .create( "nn" );
     // Number of adversaries
-    Option numAdversaries   = OptionBuilder.withArgName( "NUM_ADVERSARIES" )
+    Option numAdversaries   = OptionBuilder.withArgName( "int" )
                                 .hasArg()
                                 .withType(Number.class)
-                                .withDescription(  "use <NUM_ADVERSARIES> number of adversaries in the simulation" )
+                                .withDescription(  "use this number of adversaries in the simulation" )
                                 .create( "na" );
     
     // Message authorship
     Option authorship       = OptionBuilder.withArgName( "author" )
                                 .hasArg()
-                                .withDescription(  "use author with the given popularity in the simulation (p=popular,u=unpopular,a=adversarial,r=random)" )
-                                .create( "auth" );
+                                .withDescription(  "use author with the given popularity in the simulation (popular,unpopular,adversarial,random)" )
+                                .create( "author" );
     
     // Stationary jamming option
-    Option stationaryJammers = OptionBuilder.withArgName( "num stationary jammers, jammer radius" )
-                                .hasArgs(2)
-                                .withValueSeparator()
-                                .withDescription( "How many stationary jammers to use, and what radius to give them" )
-                                .create( "stationaryJammers" );
-                                            
+    Option stationaryJammers = OptionBuilder.withArgName( "int" )
+                                .hasArg()
+                                .withDescription( "How many stationary jammers to use" )
+                                .create( "jamStationary" );
+                                
+    // Stationary jamming optimality
+    Option optimalJammers = new Option( "jamOpt", "Should stationary jammers use optimal placement?" );
+    
+    // jamming radius
+    Option jamRadius =  OptionBuilder.withArgName( "double" )
+                                .hasArg()
+                                .withDescription( "Radius of jammer(s)" )
+                                .create( "radius" );
+    
     // Mobile jamming option
-    Option mobileJammers = OptionBuilder.withArgName( "num mobile jammers, jammer radius" )
-                                .hasArgs(2)
-                                .withValueSeparator()
-                                .withDescription( "How many mobile jammers to use, and what radius to give them" )
-                                .create( "mobileJammers" );
+    Option mobileJammers = OptionBuilder.withArgName( "int" )
+                                .hasArg()
+                                .withDescription( "How many mobile jammers to use" )
+                                .create( "jamMobile" );
                                             
     Options options = new Options();
     options.addOption( numNodes );
     options.addOption( numAdversaries );
     options.addOption( authorship );
     options.addOption( stationaryJammers );
+    options.addOption( optimalJammers );
+    options.addOption( mobileJammers );
+    options.addOption( jamRadius );
+    
     return options;
   }
   
@@ -596,55 +611,60 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     try {
         // parse the command line arguments
         CommandLine line = parser.parse( options, args );
+        
         // has the numnodes argument been passed?
-        if( line.hasOption( "nn" ) ) {
-            // initialise the member variable
-            int nPeople = -1;
-            try {
-                nPeople = Integer.parseInt( line.getOptionValue( "nn" ));
-            }
-            catch (NumberFormatException e) {
-                System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
-            }
-            if (nPeople > 0) {
-                NUMBER_OF_PEOPLE = nPeople;
-            }
-            System.err.println("set the number of people to "+NUMBER_OF_PEOPLE);
+        NUMBER_OF_PEOPLE = parseIntegerArg( line, "nn" , NUMBER_OF_PEOPLE );
+        if (NUMBER_OF_PEOPLE < 1) {
+            // automatically generate the help statement
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp( "ProximitySimulation", options, true );
+            System.err.println( "\n\nYou must enter a valid number of people." );
+            return;
         }
         
-        if( line.hasOption( "na" ) ) {
-            // initialise the member variable
-            int nAdv = -1;
-            try {
-                nAdv = Integer.parseInt( line.getOptionValue( "na" ));
-            }
-            catch (NumberFormatException e) {
-                System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
-            }
-            if ((nAdv > 0) && (nAdv < NUMBER_OF_PEOPLE)) {
-                NUMBER_OF_ADVERSARIES = nAdv;
-            } else {
-                System.err.println("Please enter a valid number of adversaries.");
-            }
-            System.err.println("set the number of adversaries to "+NUMBER_OF_ADVERSARIES);
-        }
+        // Number of adversaries (default=0)
+        NUMBER_OF_ADVERSARIES = parseIntegerArg( line, "na" , NUMBER_OF_ADVERSARIES );
+        NUMBER_OF_ADVERSARIES = Math.min( NUMBER_OF_PEOPLE, NUMBER_OF_ADVERSARIES);
         
-        if( line.hasOption( "auth" ) ) {
+        // author popularity (default = random)
+        if( line.hasOption( "author" ) ) {
             // initialise the member variable
-            String popularity = line.getOptionValue( "auth" );
-            System.err.println("popularity is "+popularity);
-            if (popularity.equals("r")) {
+            String popularity = line.getOptionValue( "author" );
+            if (popularity.equals("random")) {
                 messageAuthor = RANDOM_AUTHOR;
-            } else if (popularity.equals("p")) {
+            } else if (popularity.equals("popular")) {
                 messageAuthor = POPULAR_AUTHOR;
                 popularAuthor = true;
-            } else if (popularity.equals("u")) {
+            } else if (popularity.equals("unpopular")) {
                 messageAuthor = POPULAR_AUTHOR;
                 popularAuthor = false;
-            } else if (popularity.equals("a")) {
+            } else if (popularity.equals("adversarial")) {
                 messageAuthor = ADVERSARIAL_AUTHOR;
+            } else {
+                System.err.println("Not a valid popularity flag.");
             }
         }
+        
+        // number of stationary jammers
+        NUMBER_OF_STATIC_JAMMERS = parseIntegerArg( line, "jamStationary" , NUMBER_OF_STATIC_JAMMERS );
+        if (NUMBER_OF_STATIC_JAMMERS > 0) {
+            staticJamming = true;
+        }
+        
+        // stationary jammer optimality
+        if( line.hasOption( "jamOpt" ) ) {
+            staticJammingOptimal = true;
+        }
+        
+        //Mobile jammers
+        NUMBER_OF_MOBILE_JAMMERS = parseIntegerArg( line, "jamMobile" , NUMBER_OF_MOBILE_JAMMERS );
+        if (NUMBER_OF_MOBILE_JAMMERS > 0) {
+            mobileJamming = true;
+        }
+        
+        //Jammers' radius
+        JAMMING_RADIUS = parseDoubleArg( line, "radius" , JAMMING_RADIUS );
+        
     } 
     catch( Exception exp ) {
         // oops, something went wrong
@@ -652,32 +672,62 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
   }
   
+  public static int parseIntegerArg(CommandLine line, String argName, int variable) {
+    // parse an input with an integer value
+    if( line.hasOption( argName ) ) {
+        int num = -1;
+        try {
+            num = Integer.parseInt( line.getOptionValue( argName ));
+        }
+        catch (NumberFormatException e) {
+            System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
+        }
+        
+        if (num > 0) {
+            variable = num;
+        }
+        System.err.println("set " + argName + " to "+variable);
+        
+    }
+    return variable;
+  
+  }
+  
+  public static double parseDoubleArg(CommandLine line, String argName, double variable) {
+    // parse an input with a double value
+    if( line.hasOption( argName ) ) {
+        double num = 0.0;
+        try {
+            num = Double.parseDouble( line.getOptionValue( argName ));
+        }
+        catch (NumberFormatException e) {
+            System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
+        }
+        
+        if (num > 0.0) {
+            variable = num;
+        }
+        System.err.println("set " + argName + " to "+variable);
+        
+    }
+    return variable;
+  
+  }
+  
   public static void main(String[] args) {
   
     
     // create Options object
     Options options = createCommandLineOptions();
-
+    
+    // Parse the inputs
     parseOptions(args,options);
     
     
-    // if (args.length > 0) {
-        // for (String arg : args){
-            // System.err.println(arg);
-            // if (arg.equals("-r")) {
-                // messageAuthor = RANDOM_AUTHOR;
-            // } else if (arg.equals("-p")) {
-                // messageAuthor = POPULAR_AUTHOR;
-                // popularAuthor = true;
-            // } else if (arg.equals("-u")) {
-                // messageAuthor = POPULAR_AUTHOR;
-                // popularAuthor = false;
-            // } else if (arg.equals("-a")) {
-                // messageAuthor = ADVERSARIAL_AUTHOR;
-            // }
-        // }
-    // }
-    doLoop(ProximitySimulation.class, args);
-    System.exit(0);
+    if (NUMBER_OF_PEOPLE > 0) {
+        //Run the simulation
+        doLoop(ProximitySimulation.class, args);
+        System.exit(0);
+    }
   }
 }
