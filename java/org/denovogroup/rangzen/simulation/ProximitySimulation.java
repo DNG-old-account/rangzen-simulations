@@ -27,6 +27,20 @@ import java.util.Date;
 import java.util.TreeMap;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.util.Properties;
+
+import org.apache.commons.cli.AlreadySelectedException;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.MissingArgumentException;
+import org.apache.commons.cli.MissingOptionException;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 public class ProximitySimulation extends MessagePropagationSimulation {
   private static final long serialVersionUID = 1;
@@ -40,25 +54,38 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static final int height = 33360;
   public static final double discretization = 
           ProximityEncounterModel.NEIGHBORHOOD_RADIUS * 2;
+          
+  // Population parameters        
+  public static int NUMBER_OF_PEOPLE = 0;
+  public static int NUMBER_OF_ADVERSARIES = 0;
+  
+  // -------Simulation parameters------//
+  public static final double EPSILON_TRUST = .001;
+  public static final int MAX_FRIENDS = 40;
+  public static final double MAX_RUNTIME = 150; // in hours
+  
+  // Jamming
+  public static boolean mobileJamming = false;
+  public static boolean staticJamming = false;
+  public static boolean staticJammingOptimal = false;
+  public static int NUMBER_OF_STATIC_JAMMERS = 0;
+  public static int NUMBER_OF_MOBILE_JAMMERS = 0;
+  public static double JAMMING_RADIUS = 50.0; // meters  
    
-  // Adversary tests
+  
+  // Message authorship
   public static final String RANDOM_AUTHOR = "Random author";
   public static final String ADVERSARIAL_AUTHOR = "Adversarial author";
   public static final String POPULAR_AUTHOR = "(Un)popular author";
   
-  public static final int NUMBER_OF_ADVERSARIES = 3;
   public static String messageAuthor = RANDOM_AUTHOR;
   public static boolean popularAuthor = false;
-  
-  public static final boolean mobileJamming = false;
-  public static final boolean staticJamming = false;
-  public static final boolean staticJammingOptimal = false;
-  
-  public static final int NUMBER_OF_STATIC_JAMMERS = 5;
-  public static final double JAMMING_RADIUS = 5000.0; // meters
 
+ // Mobility trace
   public static final String CABSPOTTING_MOBILITY_TRACE_INDEX_FILE =
           "data/cabdatafiles.txt";
+  public static final String CABSPOTTING_OPTIMAL_JAMMER_LOCATIONS =
+          "data/cabspottingdata/jammerLocations/";
 
   public static final char QUOTE_CHAR = '"';
   
@@ -116,7 +143,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     createAdversaries();
     
     
-    // addSybilAndJammingStuff(); (NEVER CALL THIS! It recreates the network!)
+    addJammers(); 
     
 
     System.err.println("Start() complete. All input files parsed.");
@@ -128,131 +155,157 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     System.out.println(jsonOutput);
   }
   
-  private void addSybilAndJammingStuff() {
-    // Set up static jammers
-    if (staticJamming) {
-               
-        //strategic locations (From the simulated annleaing approach)
-        if (JAMMING_RADIUS == 100 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7857, -122.4173));
-            jammerLocations.add(new Double2D(37.7916, -122.4080));
-            jammerLocations.add(new Double2D(37.7911, -122.4129));
-            jammerLocations.add(new Double2D(37.7874, -122.4106));
-            jammerLocations.add(new Double2D(37.7971, -122.4106));
-        } else if (JAMMING_RADIUS == 200 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7964, -122.4056));
-            jammerLocations.add(new Double2D(37.7867, -122.4097));
-            jammerLocations.add(new Double2D(37.7989, -122.4088));
-            jammerLocations.add(new Double2D(37.7860, -122.4052));
-            jammerLocations.add(new Double2D(37.7906, -122.4095));
-        }else if (JAMMING_RADIUS == 500 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7964, -122.4338));
-            jammerLocations.add(new Double2D(37.7874, -122.4189));
-            jammerLocations.add(new Double2D(37.7910, -122.3991));
-            jammerLocations.add(new Double2D(37.7865, -122.4072));
-            jammerLocations.add(new Double2D(37.7959, -122.4077));
-        }else if (JAMMING_RADIUS == 700 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7887, -122.3968));
-            jammerLocations.add(new Double2D(37.7912, -122.4195));
-            jammerLocations.add(new Double2D(37.7836, -122.4076));
-            jammerLocations.add(new Double2D(37.7798, -122.4183));
-            jammerLocations.add(new Double2D(37.7950, -122.4076));
-            // jammerLocations.add(new Double2D(37.7912, -122.4239));
-            // jammerLocations.add(new Double2D(37.7817, -122.4006));
-            // jammerLocations.add(new Double2D(37.8019, -122.4107));
-            // jammerLocations.add(new Double2D(37.7931, -122.4025));
-            // jammerLocations.add(new Double2D(37.7868, -122.4120));
-        }else if (JAMMING_RADIUS == 1000 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7937, -122.4280));
-            jammerLocations.add(new Double2D(37.7566, -122.4000));
-            jammerLocations.add(new Double2D(37.7819, -122.4136));
-            jammerLocations.add(new Double2D(37.8000, -122.4099));
-            jammerLocations.add(new Double2D(37.7883, -122.3964));
-        }else if (JAMMING_RADIUS == 1300 && staticJammingOptimal) {
-            jammerLocations.add(new Double2D(37.7971, -122.4312));
-            jammerLocations.add(new Double2D(37.7594, -122.4029));
-            jammerLocations.add(new Double2D(37.7888, -122.4065));
-            jammerLocations.add(new Double2D(37.7735, -122.4253));
-            jammerLocations.add(new Double2D(37.8135, -122.4135));
-        }else if (JAMMING_RADIUS == 1500 && staticJammingOptimal) {            
-            jammerLocations.add(new Double2D(37.7790, -122.4210));
-            jammerLocations.add(new Double2D(37.7586, -122.4007));
-            jammerLocations.add(new Double2D( 37.7912, -122.3966));
-            jammerLocations.add(new Double2D(37.7966, -122.4428));
-            jammerLocations.add(new Double2D(37.8088, -122.4170));
-        }else if (JAMMING_RADIUS == 2000 && staticJammingOptimal) {            
-            jammerLocations.add(new Double2D(37.7955, -122.4136));
-            jammerLocations.add(new Double2D(37.7755, -122.4445));
-            jammerLocations.add(new Double2D(37.6682, -122.3973));
-            jammerLocations.add(new Double2D(37.7591, -122.4100));
-            jammerLocations.add(new Double2D(37.7773, -122.3773));
-        }else if (JAMMING_RADIUS == 5000 && staticJammingOptimal) {            
-            jammerLocations.add(new Double2D(37.7469, -122.4715));
-            jammerLocations.add(new Double2D(37.7285, -122.3654));
-            jammerLocations.add(new Double2D(37.8300, -122.2915));
-            jammerLocations.add(new Double2D(37.8069, -122.4069));
-            jammerLocations.add(new Double2D(37.6685, -122.4254));
-        } else {
-            //random locations
-            for (int i=0; i<NUMBER_OF_STATIC_JAMMERS; i++) {
-                Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
-                                                space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
-                jammerLocations.add(randomLoc);
+  
+  /** Adversary-related methods **/
+  
+  public void createAdversaries(){
+    // --------Assign adversaries to the worst-connected nodes--------------
+    Bag people = socialNetwork.getAllNodes();
+    // Get the ordered list of nodes in increasing degree
+    List<Integer> indices = orderNodesByDegree(people);
+    
+    // Now assign the lowest-connected nodes to adversaries
+    int numAdversaries = 0;
+    Bag allAdversaryFriends = new Bag();
+    Bag allAdversaries = new Bag();
+    Bag myFriends = new Bag();    
+    while ( numAdversaries < NUMBER_OF_ADVERSARIES) {
+        // find which node has the cnt lowest degree
+        int authorIdx = indices.get(numAdversaries);
+        
+        // assign adversaries to lowest-degree nodes
+        Person person = (Person) people.objs[authorIdx];
+            
+        // Make the person an adversary
+        
+        person.trustPolicy = Person.TRUST_POLICY_ADVERSARY;
+        allAdversaries.add(person);
+        
+        numAdversaries++;
+                    
+        // Add this person's friends to the adversarial Bag-o-friends
+        socialNetwork.getEdges(person,myFriends);
+        for ( Object friend : myFriends ) {
+            Object otherNode = ((Edge) friend).getOtherNode(person);
+            if (! bagContains(allAdversaryFriends, otherNode )) {
+                allAdversaryFriends.add(otherNode);
             }
         }
     }
     
-    // Create the people as either adversaries or regular citizens
-    Person p;
-    List<String> locationTraceFilenames;
-    try {
-      locationTraceFilenames = getLocationTraceFilenames(traceIndexFilename); 
-      // System.out.println(locationTraceFilenames);
-    } catch (FileNotFoundException e) {
-      System.err.println(e);
-      locationTraceFilenames = new ArrayList<String>();
-    }
-    Iterator<String> traceIterator = locationTraceFilenames.iterator();
-    for (int i=0; i<NUMBER_OF_PEOPLE; i++) {
-      // System.err.println("Here:" + i + " " + arrayContains(adversaries,i));
-      
-      //--------- Add people to the network-----------
-      p = new Person(i, Person.TRUST_POLICY_SIGMOID_FRACTION_OF_FRIENDS, this);
-      
-      
-      // Place the person somewhere near-ish the middle of the space.
-      // Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
-      //     space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
-      // space.setObjectLocation(p, randomLoc);
-
-      try {
-        p.addMobilityTrace(traceIterator.next());
-        setObjectLatLonLocation(p, p.mobilityTrace.locations.get(0));
-      } catch (FileNotFoundException e) {
-        System.err.println(e);
-        // Well.
-      }
-      // System.err.println("Person: " + ((Person)p).trustPolicy);
-
-      // See call to add social edges below. Here people are simply
-      // added as entities in the network.
-      
-      socialNetwork.addNode(p);
-
-      // Schedule the person to move, author messages, etc.
-      // schedule.scheduleRepeating(p);
-      p.schedule();
-    }
-    System.err.println("Adding scale-free social graph.");
-    addScaleFreeRandomSocialGraph();
+    System.err.println("The adversaries have this many friends: "+allAdversaryFriends.numObjs);
     
-    // Throw in some adversaries at the lowest-degree nodes
-    createAdversaries();
-    // schedule.scheduleRepeating(new SimpleEncounterModel());
-    // schedule.scheduleOnce(new ProximityEncounterModel());
+    
+    // Make sure each adversary has the ENTIRE adversarial Bag-o-friends
+    double buddiness = 1.0;
+    for (Object adv : allAdversaries) {
+        for (Object friend : allAdversaryFriends ) {
+            if (! areFriends(adv,friend)) {
+                socialNetwork.addEdge(adv, friend, new Double(buddiness));
+            }
+        }
+    }
+    
+  }
+  
+  private void addJammers() {
+    /** This method adds stationary jammers to the grid in either optimally-chosen or random locations */ 
+    
+    // Set up static jammers
+    if (staticJamming) {
+               
+        //strategic locations (From the simulated annleaing approach)
+        if (staticJammingOptimal) {
+            try {
+                String csvFile = CABSPOTTING_OPTIMAL_JAMMER_LOCATIONS + "cabspotting_"+((int)JAMMING_RADIUS)+".csv";
+                placeOptimalJammers(csvFile);
+            }
+            catch (Exception e) {
+                placeJammersRandomly();
+            }
+        }
+        else {
+            //random locations
+            placeJammersRandomly();
+        }
+    }
+    
+    // set up mobile jammers (as members of the adversarial team)
+    if (mobileJamming) {
+        placeMobileJammers();
+    }
 
   }
   
+  private void placeJammersRandomly() {
+    //place the jammers at random in the grid
+    for (int i=0; i<NUMBER_OF_STATIC_JAMMERS; i++) {
+        Double2D randomLoc = new Double2D(space.getWidth() * 0.5 + random.nextInt(100) - 0.5,
+                                        space.getHeight() * 0.5 + random.nextInt(100) - 0.5);
+        jammerLocations.add(randomLoc);
+    }
+  }
+  
+  private void placeOptimalJammers(String csvFile) {
+    BufferedReader br = null;
+	String line = "";
+	String cvsSplitBy = ",";
+    
+    try {
+		br = new BufferedReader(new FileReader(csvFile));
+        int numJammers = 0;
+		while ((line = br.readLine()) != null && numJammers < NUMBER_OF_STATIC_JAMMERS) {
+            double lat,lon;
+            // use comma as separator
+			String[] coords = line.split(cvsSplitBy);
+            lat = Double.parseDouble(coords[0]);
+            lon = Double.parseDouble(coords[1]);
+            System.err.println("Coordinates are "+lat+" , "+lon);
+            jammerLocations.add(new Double2D(lat, lon));
+            numJammers += 1;
+ 
+		}
+        if (numJammers < NUMBER_OF_STATIC_JAMMERS) {
+            System.err.println("Did not have enough optimal locations for all the jammers. Could only add "+numJammers+" jammers.");
+        }
+ 
+	} catch (FileNotFoundException e) {
+		e.printStackTrace();
+	} catch (IOException e) {
+		e.printStackTrace();
+	} finally {
+		if (br != null) {
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+  
+  }
+ 
+  private void placeMobileJammers() {
+    int numJammers = 0;
+    Bag people = socialNetwork.getAllNodes();
+    for (Object person : people) {
+        if (((Person) person).trustPolicy == Person.TRUST_POLICY_ADVERSARY) {
+            ((Person) person).trustPolicy = Person.TRUST_POLICY_ADVERSARY_JAMMER;
+            System.err.println("Assigned node "+((Person) person).name + " to be a mobile jammer.");
+            numJammers += 1;
+        }
+        if (numJammers >= NUMBER_OF_MOBILE_JAMMERS) {
+            break;
+        }
+    }
+    if (numJammers < NUMBER_OF_MOBILE_JAMMERS) {
+        System.err.println("You don't have enough adversaries to establish this many mobile jammers. Please set the -na flag.");
+    }
+  }
+ 
+ 
+ /** Mobility and social-graph related methods **/
+ 
   private void addGowallaPeopleAndSocialNetwork() {
     // Parse the social network file.
     try {
@@ -337,17 +390,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
       System.exit(1);
     }
   }
-
-  private Person getPersonWithID(int id) {
-    Bag people = socialNetwork.getAllNodes();
-    for (int i=0; i<people.numObjs; i++) {
-      Person p = (Person) people.objs[i];
-      if (p.name == id) {
-        return p;
-      }
-    }
-    return null;
-  }
+  
   private void addCabspottingPeopleAndRandomSocialNetwork() {
     List<String> locationTraceFilenames;
     try {
@@ -378,11 +421,14 @@ public class ProximitySimulation extends MessagePropagationSimulation {
       p.schedule();
 
     }
+    
+    //Adds a Barabasi-Albert social graph
     addScaleFreeRandomSocialGraph();
   }
 
 
   private void addRandomSocialEdges() {
+  /** Adds a uniformly random social graph-- just picks 5 nodes for each node to be connected to */
     Bag people = socialNetwork.getAllNodes();
     for (Object person : people) {
       for (int i=0; i<5; i++) {
@@ -398,6 +444,52 @@ public class ProximitySimulation extends MessagePropagationSimulation {
       }
     }
   }
+  
+  private void addScaleFreeRandomSocialGraph() {
+    /** Implements the Barabasi-Albert model for building a social graph */
+    Bag people = socialNetwork.getAllNodes();
+    
+    Bag friends = new Bag();
+    double probability;
+    int totalDegree = 0;
+    double attractiveness;
+    boolean adversaryFlag = false;
+    for (Object person : people) {      
+      for (Object otherPerson : people) {
+        // make sure that the two people are not the same and not already friends
+        if (person == otherPerson || areFriends(person,otherPerson)) {
+            continue;
+        }
+        
+        // Draw an edge according to Barabasi-Albert model
+        probability = random.nextDouble();
+        
+        // how much a node is likely to attract a new node
+        socialNetwork.getEdges(person,friends);
+        attractiveness = ((double)friends.numObjs)/totalDegree + 0.02;
+        if ((probability < attractiveness) || (totalDegree == 0)){
+        
+            double buddiness = 1.0;
+            socialNetwork.addEdge(person, otherPerson, new Double(buddiness));
+            totalDegree = totalDegree + 1;
+        }
+      }
+    }
+  }
+  
+  /** Utilities **/
+  
+  private Person getPersonWithID(int id) {
+    Bag people = socialNetwork.getAllNodes();
+    for (int i=0; i<people.numObjs; i++) {
+      Person p = (Person) people.objs[i];
+      if (p.name == id) {
+        return p;
+      }
+    }
+    return null;
+  }
+  
   public boolean arrayContains(int[] ar, int value) {
     for (int i = 0; i<ar.length; i++) {
         if (ar[i] == value){
@@ -415,88 +507,12 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
     return false;
   }
-  private void addScaleFreeRandomSocialGraph() {
-    /** Implements the Barabasi-Albert model for building a social graph */
-    Bag people = socialNetwork.getAllNodes();
-    
-    Bag friends = new Bag();
-    double probability;
-    int totalDegree = 0;
-    double attractiveness;
-    boolean adversaryFlag = false;
-    for (Object person : people) {      
-      for (Object otherPerson : people) {
-        if (person == otherPerson) {
-            continue;
-        }
-        // Draw an edge according to Barabasi-Albert model
-        probability = random.nextDouble();
-        // how much a node is likely to attract a new node
-        socialNetwork.getEdges(person,friends);
-        attractiveness = ((double)friends.numObjs)/totalDegree + 0.02;
-        if ((probability < attractiveness) || (totalDegree == 0)){
-        
-          double buddiness = 1.0;
-          socialNetwork.addEdge(person, otherPerson, new Double(buddiness));
-          totalDegree = totalDegree + 1;
-          // System.out.println(person + " is friends with " + personB);
-        }
-      }
-    }
-  }
   
-  public void createAdversaries(){
-    // --------Assign adversaries to the worst-connected nodes--------------
-    Bag people = socialNetwork.getAllNodes();
-    System.err.println("hi");
-    // Get the ordered list of nodes in increasing degree
-    List<Integer> indices = orderNodesByDegree(people);
-    
-    // Now assign the lowest-connected nodes to adversaries
-    int numAdversaries = 0;
-    Bag allAdversaryFriends = new Bag();
-    Bag allAdversaries = new Bag();
-    Bag myFriends = new Bag();
-    System.err.println("\n\nThe adversaries have this many friends: "+allAdversaryFriends.numObjs);
-    
-    while ( numAdversaries < NUMBER_OF_ADVERSARIES) {
-        // find which node has the cnt lowest degree
-        int authorIdx = indices.get(numAdversaries);
-        
-        // assign adversaries to lowest-degree nodes
-        Person person = (Person) people.objs[authorIdx];
-            
-        // Make the person an adversary
-        
-        person.trustPolicy = Person.TRUST_POLICY_ADVERSARY;
-        allAdversaries.add(person);
-        
-        numAdversaries++;
-                    
-        // Add this person's friends to the adversarial Bag-o-friends
-        socialNetwork.getEdges(person,myFriends);
-        for ( Object friend : myFriends ) {
-            Object otherNode = ((Edge) friend).getOtherNode(person);
-            if (! bagContains(allAdversaryFriends, otherNode )) {
-                allAdversaryFriends.add(otherNode);
-            }
-        }
-    }
-    
-    System.err.println("The adversaries have this many friends: "+allAdversaryFriends.numObjs);
-    
-    
-    // Make sure each adversary has the ENTIRE adversarial Bag-o-friends
-    double buddiness = 1.0;
-    for (Object adv : allAdversaries) {
-        for (Object friend : allAdversaryFriends ) {
-            socialNetwork.getEdges(adv,myFriends);
-            if (! bagContains(myFriends,friend)) {
-                socialNetwork.addEdge(adv, friend, new Double(buddiness));
-            }
-        }
-    }
-    
+  public boolean areFriends(Object node1, Object node2) {
+    // checks if node1 and node2 are friends
+    Bag myFriends = new Bag();  
+    socialNetwork.getEdges(node1,myFriends);
+    return bagContains(myFriends,node2);
   }
 
   public void setObjectLatLonLocation(Object object, Location location) {
@@ -575,24 +591,188 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     super(seed);
   }
 
-  public static void main(String[] args) {
-    if (args.length > 0) {
-        for (String arg : args){
-            System.err.println(arg);
-            if (arg.equals("-r")) {
+  /** Command-line options-related methods **/
+  
+  public static Options createCommandLineOptions() {
+    
+    // Number of nodes
+    Option numNodes   = OptionBuilder.withArgName( "int" )
+                                .hasArg()
+                                .withType(Number.class)
+                                .withDescription(  "use this number of nodes in the simulation" )
+                                .create( "nn" );
+    // Number of adversaries
+    Option numAdversaries   = OptionBuilder.withArgName( "int" )
+                                .hasArg()
+                                .withType(Number.class)
+                                .withDescription(  "use this number of adversaries in the simulation" )
+                                .create( "na" );
+    
+    // Message authorship
+    Option authorship       = OptionBuilder.withArgName( "author" )
+                                .hasArg()
+                                .withDescription(  "use author with the given popularity in the simulation (popular,unpopular,adversarial,random)" )
+                                .create( "author" );
+    
+    // Stationary jamming option
+    Option stationaryJammers = OptionBuilder.withArgName( "int" )
+                                .hasArg()
+                                .withDescription( "How many stationary jammers to use" )
+                                .create( "jamStationary" );
+                                
+    // Stationary jamming optimality
+    Option optimalJammers = new Option( "jamOpt", "Should stationary jammers use optimal placement?" );
+    
+    // jamming radius
+    Option jamRadius =  OptionBuilder.withArgName( "double" )
+                                .hasArg()
+                                .withDescription( "Radius of jammer(s)" )
+                                .create( "radius" );
+    
+    // Mobile jamming option
+    Option mobileJammers = OptionBuilder.withArgName( "int" )
+                                .hasArg()
+                                .withDescription( "How many mobile jammers to use" )
+                                .create( "jamMobile" );
+                                            
+    Options options = new Options();
+    options.addOption( numNodes );
+    options.addOption( numAdversaries );
+    options.addOption( authorship );
+    options.addOption( stationaryJammers );
+    options.addOption( optimalJammers );
+    options.addOption( mobileJammers );
+    options.addOption( jamRadius );
+    
+    return options;
+  }
+  
+  public static void parseOptions(String[] args, Options options) {
+    // create the parser
+    GnuParser parser = new GnuParser();
+    try {
+        // parse the command line arguments
+        CommandLine line = parser.parse( options, args );
+        
+        // has the number of nodes argument been passed?
+        NUMBER_OF_PEOPLE = parseIntegerArg( line, "nn" , NUMBER_OF_PEOPLE );
+        if (NUMBER_OF_PEOPLE < 1) {
+            // automatically generate the help statement
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp( "ProximitySimulation", options, true );
+            System.err.println( "\n\nYou must enter a valid number of people." );
+            return;
+        }
+        
+        // Number of adversaries (default=0)
+        NUMBER_OF_ADVERSARIES = parseIntegerArg( line, "na" , NUMBER_OF_ADVERSARIES );
+        NUMBER_OF_ADVERSARIES = Math.min( NUMBER_OF_PEOPLE, NUMBER_OF_ADVERSARIES);
+        
+        // author popularity (default = random)
+        if( line.hasOption( "author" ) ) {
+            // initialise the member variable
+            String popularity = line.getOptionValue( "author" );
+            if (popularity.equals("random")) {
                 messageAuthor = RANDOM_AUTHOR;
-            } else if (arg.equals("-p")) {
+            } else if (popularity.equals("popular")) {
                 messageAuthor = POPULAR_AUTHOR;
                 popularAuthor = true;
-            } else if (arg.equals("-u")) {
+            } else if (popularity.equals("unpopular")) {
                 messageAuthor = POPULAR_AUTHOR;
                 popularAuthor = false;
-            } else if (arg.equals("-a")) {
+            } else if (popularity.equals("adversarial")) {
                 messageAuthor = ADVERSARIAL_AUTHOR;
+            } else {
+                System.err.println("Not a valid popularity flag.");
             }
         }
+        
+        // number of stationary jammers
+        NUMBER_OF_STATIC_JAMMERS = parseIntegerArg( line, "jamStationary" , NUMBER_OF_STATIC_JAMMERS );
+        if (NUMBER_OF_STATIC_JAMMERS > 0) {
+            staticJamming = true;
+        }
+        
+        // stationary jammer optimality
+        if( line.hasOption( "jamOpt" ) ) {
+            staticJammingOptimal = true;
+        }
+        
+        //Mobile jammers
+        NUMBER_OF_MOBILE_JAMMERS = parseIntegerArg( line, "jamMobile" , NUMBER_OF_MOBILE_JAMMERS );
+        if (NUMBER_OF_MOBILE_JAMMERS > 0) {
+            mobileJamming = true;
+        }
+        
+        //Jammers' radius
+        JAMMING_RADIUS = parseDoubleArg( line, "radius" , JAMMING_RADIUS );
+        
+    } 
+    catch( Exception exp ) {
+        // oops, something went wrong
+        System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
     }
-    doLoop(ProximitySimulation.class, args);
-    System.exit(0);
+  }
+  
+  public static int parseIntegerArg(CommandLine line, String argName, int variable) {
+    // parse an input with an integer value
+    if( line.hasOption( argName ) ) {
+        int num = -1;
+        try {
+            num = Integer.parseInt( line.getOptionValue( argName ));
+        }
+        catch (NumberFormatException e) {
+            System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
+        }
+        
+        if (num > 0) {
+            variable = num;
+        }
+        System.err.println("set " + argName + " to "+variable);
+        
+    }
+    return variable;
+  
+  }
+  
+  public static double parseDoubleArg(CommandLine line, String argName, double variable) {
+    // parse an input with a double value
+    if( line.hasOption( argName ) ) {
+        double num = 0.0;
+        try {
+            num = Double.parseDouble( line.getOptionValue( argName ));
+        }
+        catch (NumberFormatException e) {
+            System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
+        }
+        
+        if (num > 0.0) {
+            variable = num;
+        }
+        System.err.println("set " + argName + " to "+variable);
+        
+    }
+    return variable;
+  
+  }
+  
+  
+  /** main **/
+  
+  public static void main(String[] args) {
+  
+    
+    // create Options object
+    Options options = createCommandLineOptions();
+    
+    // Parse the inputs
+    parseOptions(args,options);
+    
+    
+    if (NUMBER_OF_PEOPLE > 0) {
+        //Run the simulation
+        doLoop(ProximitySimulation.class, args);
+        System.exit(0);
+    }
   }
 }

@@ -30,10 +30,6 @@ public abstract class MessagePropagationSimulation extends SimState {
   private static final long serialVersionUID = 1;
 
   public static final double METERS_PER_KILOMETER = 1000.0;
-  public static final double EPSILON_TRUST = .001;
-  public static final int MAX_FRIENDS = 40;
-  public static final int NUMBER_OF_PEOPLE = 400;
-  public static final double MAX_RUNTIME = 150; // in hours
   public static final double randomMultiplier = 0.5;
     
   /** Physical space in which mobility happens. */
