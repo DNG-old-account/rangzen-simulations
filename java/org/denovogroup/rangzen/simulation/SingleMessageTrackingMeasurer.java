@@ -1,24 +1,62 @@
+/*
+ * Copyright (c) 2014, De Novo Group
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.denovogroup.rangzen.simulation;
 
-import sim.engine.Steppable;
 import sim.engine.SimState;
+import sim.engine.Steppable;
 import sim.util.Bag;
 
-import com.google.gson.GsonBuilder;
 import com.google.gson.Gson;
-
-import java.util.List;
-import java.util.Random;
-import java.util.ArrayList;
-import java.util.UUID;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Arrays;
-import java.util.TreeMap;
+import com.google.gson.GsonBuilder;
 
 import java.lang.Math;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.TreeMap;
+import java.util.UUID;
 
-
+/**
+ * A class containing the logic necessary for tracking the progress of a single
+ * message through the population of people in a simulation. It checks at each
+ * time step to see how many people have received the message and records the
+ * time and number.
+ *
+ * This measurer also CREATES the message it will track on the 0th timestep.
+ *
+ * It is also responsible for formatting its data as JSON on request.
+ */
 public class SingleMessageTrackingMeasurer implements Steppable {
   private static final long serialVersionUID = 1;
 
@@ -38,12 +76,21 @@ public class SingleMessageTrackingMeasurer implements Steppable {
   // Storages the history of message propgation.
   Map<Double, Integer> timestepToPropagation;
 
+  /** 
+   * Create a new SingleMessageTrackingMeasurer as part of the given simulation.
+   */
   public SingleMessageTrackingMeasurer(MessagePropagationSimulation sim) {
     this.sim = sim;
     this.trackedMessage = new Message(UUID.randomUUID().toString(), 1.0);
     this.timestepToPropagation = new HashMap<Double, Integer>();
   }
 
+  /**
+   * On the 0th timestep, create the message and give it to a person.
+   *
+   * On all timesteps, check how many people have the message and record
+   * that information with the current simluation time.
+   */
   public void step(SimState state) {
     MessagePropagationSimulation sim = (MessagePropagationSimulation) state;
     double time = sim.schedule.getTime();
@@ -107,6 +154,9 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     // System.out.println(getMeasurementsAsJSON());
   }
 
+  /**
+   * Create a new message and give it to a random person.
+   */
   private void authorMessage() {
     Bag people = sim.socialNetwork.getAllNodes();
     Bag tmp = new Bag();
@@ -169,20 +219,45 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     System.err.println("degree of the author is "+sim.socialNetwork.getEdges(person, tmp).numObjs);
   }
 
+  /** 
+   * This class contains the data collected by the measurer. It can be serialized
+   * to JSON by Gson.
+   *
+   * Some of the parameters here are constants which may not do quite what you
+   * expect, depending on the type of simulation.
+   */
   private class OutputData {
+    /** 
+     * A map of times to number of people having received a message at that time.
+     * The timestamps may be in seconds or milliseconds after epoch, depending
+     * on the dataset.
+     */
     public Map<Double, Integer> propagationData;
-    public int NUMBER_OF_PEOPLE;
+
     public double minTimeSeen;
     public double maxTimeSeen;
+    public double NUMBER_OF_PEOPLE;
     public double NEIGHBORHOOD_RADIUS;
     public double ENCOUNTER_CHANCE;
     public double NUMBER_OF_ADVERSARIES;
     public double priority;
+    /** Total duration of the simulation (start to finish) in seconds. */
     public double duration;
+    /** Total duration of the simulation (start to finish) in minutes. */
     public double minutesDuration;
+    /** Total duration of the simulation (start to finish) in hours. */
     public double hoursDuration;
+    /** Total duration of the simulation (start to finish) in days. */
     public double daysDuration;
   }
+
+  /**
+   * Format the measurements for this run of the simulation as JSON and return 
+   * them as a string.
+   *
+   * @return A JSON string representing the measurements collected on this run
+   * of the simulation.
+   */
   public String getMeasurementsAsJSON() {
     OutputData o = new OutputData();
     o.propagationData = timestepToPropagation;

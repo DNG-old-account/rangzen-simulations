@@ -17,4 +17,4 @@ except:
 #    os.system("java -jar -Xms6G buck-out/gen/apps/simulation/proximitySimulationNoGUI.jar -a > results/"+filebase+"/sybilSybil"+str(i)+".json")
 
 
-os.system("parallel --max-procs 10 java -jar -Xms4G buck-out/gen/apps/simulation/proximitySimulationNoGUI.jar {1} '>' results/400nodes/sybil{1}{2}.json :::: flags.txt :::: numbers.txt")
+os.system("parallel --max-procs 8 java -jar -Xms4G buck-out/gen/apps/simulation/proximitySimulationNoGUI.jar {1} '>' results/400nodes/sybil{1}{2}.json :::: flags.txt :::: numbers.txt")
