@@ -169,6 +169,9 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     }
   }
   
+  /**
+   * Create a new message and give it to an adversarial node.
+   */
   private void authorMessageAdversarial() {
     Bag people = sim.socialNetwork.getAllNodes();
     // Random randomGenerator = new Random();
@@ -181,6 +184,11 @@ public class SingleMessageTrackingMeasurer implements Steppable {
     }
   }
   
+  /**
+   * Create a new message and give it to a popular or unpopular person.
+   *
+   * @param popularFlag Indicates whether the author should be popular (true) or unpopular (false).
+   */
   private void authorMessagePopular(boolean popularFlag) {
     // if popularFlag == true, start the message from a popular node
     // else, start it from an unpopular node

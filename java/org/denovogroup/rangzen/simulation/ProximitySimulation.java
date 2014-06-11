@@ -102,27 +102,43 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   public static int NUMBER_OF_ADVERSARIES = 0;
   
   // -------Simulation parameters------//
+  /** EPSILON_TRUST is the amount of trust to assign as a minimum, to preserve ordering in low-trust messages. */
   public static final double EPSILON_TRUST = .001;
+  /** MAX_FRIENDS is the maximum number of friends that a person can submit to a mutual friendship computation. */
   public static final int MAX_FRIENDS = 40;
+  /** MAX_RUNTIME is the maximum number of hours that the simulation should run, in hours (this is in terms of 
+  the mobility trace, not the actual simulation runtime). */
   public static final double MAX_RUNTIME = 150; // in hours
   
   // Jamming
+  /** mobileJamming indicates if the simulation should use mobile jammers (true) or not (false). */
   public static boolean mobileJamming = false;
+  /** staticJamming indicates if the simulation should use stationary jammers (true) or not (false). */
   public static boolean staticJamming = false;
+  /** staticJammingOptimal indicates if the simulation should use optimally placed stationary jammers (true) or not 
+  (false). staticJamming must be true for this to have an effect. */
   public static boolean staticJammingOptimal = false;
+  /** NUMBER_OF_STATIC_JAMMERS is the number of stationary jammers to use. */
   public static int NUMBER_OF_STATIC_JAMMERS = 0;
+  /** NUMBER_OF_MOBILE_JAMMERS is the number of mobile jammers to use. */
   public static int NUMBER_OF_MOBILE_JAMMERS = 0;
+  /** JAMMING_RADIUS is the radius of the jammers to use. This should be computed based on power constraints of jamming. */
   public static double JAMMING_RADIUS = 50.0; // meters  
   
   // Message authorship
+  /** These variables describe the different kinds of authors you can choose for a message, such as a randomly-selected honest 
+  author, an adversarial author, or a popular (or unpopular) honest author. */
   public static final String RANDOM_AUTHOR = "Random author";
   public static final String ADVERSARIAL_AUTHOR = "Adversarial author";
   public static final String POPULAR_AUTHOR = "(Un)popular author";
-  
+  /** messageAuthor selects an author category from the above options. */
   public static String messageAuthor = RANDOM_AUTHOR;
+  /** popularAuthor indicates whether the author should be popular (true) or unpopular (false). This only has an effect when 
+  messageAuthor = POPULAR_AUTHOR.   */
   public static boolean popularAuthor = false;
 
  // Mobility trace
+  /** These are the different datasets you can use. */ 
   public static final String CABSPOTTING_MOBILITY_TRACE_INDEX_FILE =
           "data/cabdatafiles.txt";
   public static final String CABSPOTTING_OPTIMAL_JAMMER_LOCATIONS =
@@ -187,7 +203,7 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     // Throw in some adversaries at the lowest-degree nodes
     createAdversaries();
     
-    
+    // Add the jammers, if needed.
     addJammers(); 
     
 
@@ -207,6 +223,11 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   
   /** Adversary-related methods **/
   
+  /**
+   * Create all the adversaries based on the class parameter NUMBER_OF_ADVERSARIES by setting
+   * that number of people to have an adversarial trust policy.
+   *
+   */
   public void createAdversaries(){
     // --------Assign adversaries to the worst-connected nodes--------------
     Bag people = socialNetwork.getAllNodes();
@@ -257,8 +278,11 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     
   }
   
+  /**
+   * Create all the jammers based on the class jamming parameters.
+   *
+   */
   private void addJammers() {
-    /** This method adds stationary jammers to the grid in either optimally-chosen or random locations */ 
     
     // Set up static jammers
     if (staticJamming) {
@@ -286,6 +310,9 @@ public class ProximitySimulation extends MessagePropagationSimulation {
 
   }
   
+  /**
+   * Place all the stationary jammers randomly in the grid.
+   */
   private void placeJammersRandomly() {
     //place the jammers at random in the grid
     for (int i=0; i<NUMBER_OF_STATIC_JAMMERS; i++) {
@@ -295,6 +322,12 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
   }
   
+  /**
+   * Place all the stationary jammers at optimally-selected locations in the grid (chosen by an offline 
+   * simulated annealing algorithm).
+   *
+   * @param csvFile The name of the file containing the optimal jammer locations.
+   */
   private void placeOptimalJammers(String csvFile) {
     BufferedReader br = null;
 	String line = "";
@@ -333,7 +366,10 @@ public class ProximitySimulation extends MessagePropagationSimulation {
 	}
   
   }
- 
+  
+  /**
+   * Select adversarial nodes to be mobile jammers if needed.
+   */
   private void placeMobileJammers() {
     int numJammers = 0;
     Bag people = socialNetwork.getAllNodes();
@@ -355,6 +391,9 @@ public class ProximitySimulation extends MessagePropagationSimulation {
  
  /** Mobility and social-graph related methods **/
  
+  /**
+   * Add people and social network from the Gowalla dataset.
+   */
   private void addGowallaPeopleAndSocialNetwork() {
     // Parse the social network file.
     try {
@@ -440,6 +479,9 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
   }
   
+  /**
+   * Add the people and social network for the Cabspotting dataset.
+   */
   private void addCabspottingPeopleAndRandomSocialNetwork() {
     List<String> locationTraceFilenames;
     try {
@@ -476,6 +518,9 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   }
 
 
+  /**
+   * Generate a random social graph that uniformly at random creates 5 edges for every node.
+   */
   private void addRandomSocialEdges() {
   /** Adds a uniformly random social graph-- just picks 5 nodes for each node to be connected to */
     Bag people = socialNetwork.getAllNodes();
@@ -494,6 +539,9 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
   }
   
+  /**
+   * Generates a random social graph using the Barabasi-Albert social graph model.
+   */
   private void addScaleFreeRandomSocialGraph() {
     /** Implements the Barabasi-Albert model for building a social graph */
     Bag people = socialNetwork.getAllNodes();
@@ -539,6 +587,12 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     return null;
   }
   
+  /**
+   * See if an integer array contains the desired value.
+   * 
+   * @param ar The integer array to search.
+   * @param value The value to search for.
+   */
   public boolean arrayContains(int[] ar, int value) {
     for (int i = 0; i<ar.length; i++) {
         if (ar[i] == value){
@@ -548,6 +602,12 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     return false;
   }
   
+  /**
+   * See if a bag contains the desired object.
+   * 
+   * @param bag The bag to search.
+   * @param obj The object to search for.
+   */
   public boolean bagContains(Bag bag, Object obj) {
     for (Object item : bag) {
         if (item == obj){
@@ -557,6 +617,12 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     return false;
   }
   
+  /**
+   * See if two nodes in the network are friends.
+   * 
+   * @param node1 The first node.
+   * @param node2 The second node.
+   */
   public boolean areFriends(Object node1, Object node2) {
     // checks if node1 and node2 are friends
     Bag myFriends = new Bag();  
@@ -564,6 +630,12 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     return bagContains(myFriends,node2);
   }
 
+  /**
+   * Set the location of an object in the grid.
+   * 
+   * @param object The object to be placed.
+   * @param location The location where the object should be placed, in lat/lon.
+   */
   public void setObjectLatLonLocation(Object object, Location location) {
     Double2D simLocation = translateLatLonToSimCoordinates(location);
     // System.out.println(simLocation);
@@ -642,6 +714,10 @@ public class ProximitySimulation extends MessagePropagationSimulation {
 
   /** Command-line options-related methods **/
   
+  /**
+   * Generate command line options for setting various simulation parameters.
+   * 
+   */
   public static Options createCommandLineOptions() {
     
     // Number of nodes
@@ -696,6 +772,12 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     return options;
   }
   
+  /**
+   * Parse the command line options.
+   * 
+   * @param args The input arguments from the command line.
+   * @param options The pre-defined options that can be set.
+   */
   public static void parseOptions(String[] args, Options options) {
     // create the parser
     GnuParser parser = new GnuParser();
@@ -763,6 +845,13 @@ public class ProximitySimulation extends MessagePropagationSimulation {
     }
   }
   
+  /**
+   * Parses an integer argument from the commandline.
+   * 
+   * @param line The CommandLine from which to read the argument.
+   * @param argName The (integer) argument to be set.
+   * @param variable Stores the integer value to assign to the argument.
+   */
   public static int parseIntegerArg(CommandLine line, String argName, int variable) {
     // parse an input with an integer value
     if( line.hasOption( argName ) ) {
@@ -784,6 +873,13 @@ public class ProximitySimulation extends MessagePropagationSimulation {
   
   }
   
+  /**
+   * Parses an double argument from the commandline.
+   * 
+   * @param line The CommandLine from which to read the argument.
+   * @param argName The (double) argument to be set.
+   * @param variable Stores the double value to assign to the argument.
+   */
   public static double parseDoubleArg(CommandLine line, String argName, double variable) {
     // parse an input with a double value
     if( line.hasOption( argName ) ) {

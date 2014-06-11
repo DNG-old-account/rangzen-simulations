@@ -79,6 +79,11 @@ public abstract class MessagePropagationSimulation extends SimState {
     super.start(); 
   }
 
+  /**
+   * Sorts the nodes by their degree in the social graph, from lowest degree to highest.
+   * 
+   * @param people The Bag of People to sort.
+   */
   public List<Integer> orderNodesByDegree(Bag people) {
     /** takes in a bag of people in the social network, returns a list of integers with the ordering from
     smallest to largest */

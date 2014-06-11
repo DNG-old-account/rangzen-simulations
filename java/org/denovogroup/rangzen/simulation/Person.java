@@ -66,17 +66,24 @@ public class Person extends SimplePortrayal2D implements Steppable {
   public static final String TRUST_POLICY_ADVERSARY_JAMMER = "TRUST ONLY OTHER ADVERSARIES AND JAM";
   
   // simulation parameters
+  /** MAX_QUEUE_LENGTH is the maximum number of messages that a node can store. This represents finite storage on a device. */
   public static final int MAX_QUEUE_LENGTH = 5;
-  public static final boolean checkJamming = true;
   
   // privacy parameters
+  /** MEAN is the mean amount of Gaussian noise to add to the priority scores. */
   public static final double MEAN = 0.0;    // Mean of priority noise
+  /** VAR is the variance of the Gaussian noise to be added to the priority scores. */
   public static final double VAR = 0.1;     // variance of priority noise
   
   
+  /** name is the ID of a node in the simulation. */
   public int name;
+  /** trustPolicy is the node's policy for trusting other nodes. E.g. if it is 'adversarial', it will 
+  trust only other adversarial nodes. This is set to one of the trust policy strings defined above. */
   public String trustPolicy;
   
+  /** mobilityTrace is the mobility trace to use for node mobility. This is set to one of the mobility 
+  trace strings defined above. */
   public MobilityTrace mobilityTrace;
   // private Iterator<Location> mobilityIterator;
   private int nextStepIndex = 0;
@@ -238,6 +245,12 @@ public class Person extends SimplePortrayal2D implements Steppable {
     }
   }
 
+  /** Compute the priority score for a person normalized by the maximum number of possible friends.
+   *
+   * @param priority The priority of the message before computing trust.
+   * @param sharedFriends Number of friends shared between this person and the message sender.
+   * @param myFriends The number of friends this person has.
+   */
   public static double computeNewPriority_maxFriends(double priority,
                                                      int sharedFriends, 
                                                      int myFriends) {
@@ -248,6 +261,13 @@ public class Person extends SimplePortrayal2D implements Steppable {
     }
     return priority * trustMultiplier;
   } 
+  
+  /** Compute the priority score for a person normalized by his number of friends.
+   *
+   * @param priority The priority of the message before computing trust.
+   * @param sharedFriends Number of friends shared between this person and the message sender.
+   * @param myFriends The number of friends this person has.
+   */
   public static double computeNewPriority_fractionOfFriends(double priority,
                                                             int sharedFriends, 
                                                             int myFriends) {
@@ -258,6 +278,13 @@ public class Person extends SimplePortrayal2D implements Steppable {
     return priority * trustMultiplier;
   } 
 
+  /** Compute the priority score for a person normalized by his number of friends, and passed
+   * through a sigmoid function.
+   *
+   * @param priority The priority of the message before computing trust.
+   * @param sharedFriends Number of friends shared between this person and the message sender.
+   * @param myFriends The number of friends this person has.
+   */
   public static double computeNewPriority_sigmoidFractionOfFriends(double priority,
                                                             int sharedFriends,
                                                             int myFriends) {
@@ -275,6 +302,12 @@ public class Person extends SimplePortrayal2D implements Steppable {
     return priority * trustMultiplier;
   }
 
+  /** Pass an input trust score through a sigmoid between 0 and 1, and return the result.
+   *
+   * @param input The input trust score.
+   * @param cutoff The transition point of the sigmoid.
+   * @param rate The rate at which the sigmoid grows.
+   */
   public static double sigmoid(double input, double cutoff, double rate) {
     return 1.0/(1+Math.pow(Math.E,-rate*(input-cutoff)));
   }
@@ -291,7 +324,10 @@ public class Person extends SimplePortrayal2D implements Steppable {
     }
   }
 
-
+  /** Conduct an encounter with another person, involving exchanging messages and computing trust.
+   *
+   * @param other The person whom we should encounter.
+   */
   public void encounter(Person other) {
     Integer count = encounterCounts.get(other);
     if (count == null) {
@@ -304,6 +340,8 @@ public class Person extends SimplePortrayal2D implements Steppable {
     other.putMessages(messageQueue, this);
   }
 
+  /** Return a set containing the current person's friends in the social graph.
+   */
   public Set<Person> getFriends() {
     Bag myEdges = sim.socialNetwork.getEdges(this, null);
     Set<Person> friends = new HashSet<Person>();
@@ -321,6 +359,11 @@ public class Person extends SimplePortrayal2D implements Steppable {
     return friends;
   }
 
+  /** Return a set containing the common friend with "other". This would be handled by a 
+   * PSI operation in practice.
+   *
+   * @param other The person with whom we should compute mutual friends.
+   */
   public Set<Object> getSharedFriends(Person other) {
     Bag myEdges = sim.socialNetwork.getEdges(this, null);
     Bag otherEdges = sim.socialNetwork.getEdges(other, null);
@@ -346,6 +389,10 @@ public class Person extends SimplePortrayal2D implements Steppable {
     return sharedFriends;
   }
 
+  /** Add a mobility trace to the person's schedule.
+   *
+   * @param filename The file name for the mobility trace of this person.
+   */
   public void addMobilityTrace(String filename) throws FileNotFoundException {
     this.mobilityTrace = new MobilityTrace(filename);
     // this.mobilityIterator = mobilityTrace.iterator();
@@ -357,14 +404,25 @@ public class Person extends SimplePortrayal2D implements Steppable {
     }
   }
   
+  /** Add a mobility trace to the person's schedule.
+   *
+   * @param mobilityTrace The mobilityTrace object for the mobility trace of this person.
+   */
   public void addMobilityTrace(MobilityTrace mobilityTrace) {
     this.mobilityTrace = mobilityTrace;
   }
 
+  /** Returns a string version of this person's name.
+   */
   public String toString() {
     return "" + name;
   }
-  
+ 
+  /** Returns a number drawn from a Gaussian distribution determined by the input parameters.
+   *
+   * @param mean The mean of the Gaussian distribution.
+   * @param variance The variance of the Gaussian distribution.
+   */ 
   private static double getGaussian(double mean, double variance){
     Random fRandom = new Random();
     return mean + fRandom.nextGaussian() * Math.sqrt(variance);
